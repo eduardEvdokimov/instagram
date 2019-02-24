@@ -1,0 +1,40 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+
+
+header{
+	background: red;
+	float: left;
+	width: 100%;
+}
+
+h1{
+	float: left;
+}
+
+form{
+	margin-left: 40%;
+}
+
+#userInfo{
+	float: right;
+}
+
+
+footer{
+	float: right;
+}
+
+.show{
+	display: block;
+}
+
+.hidden{
+	display: none;
+}
+
+.background_form{
+	background: silver;
+}

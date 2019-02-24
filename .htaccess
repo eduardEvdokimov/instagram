@@ -1,0 +1,16 @@
+AddDefaultCharset UTF-8
+
+Options -Indexes
+
+DirectoryIndex index.php
+
+ErrorDocument 404 http://instagram/not_found.html
+
+
+RewriteEngine On
+RewriteBase /
+
+RewriteRule ^www/([a-z]+)/([a-zA-Z]+)/$ /?controller=$1&action=$2&%{QUERY_STRING} [L]
+
+RewriteRule ^www/user/([0-9]+)/$ /?controller=user&action=index&id=$1 [L]
+
