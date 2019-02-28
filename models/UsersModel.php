@@ -187,10 +187,12 @@ function addSubscribe($connection, $id_subscriber, $sub_object)
 
 	$sql = $connection->prepare($GLOBALS['SQL']->sql_add_sub);
 
-	if($sql->execute([$id_subscriber, $sub_object]))
+	if($sql->execute([$id_subscriber, $sub_object])){
 		return true;
-	else
+	}
+	else{
 		return false;
+	}
 }
 
 function deletSubscribe($connection, $id_subscriber, $sub_object)
@@ -288,10 +290,6 @@ function registrationVK($connection, $data)
 				return $variable;
 			}
 		}
-
-
-
-
 
 	}
 

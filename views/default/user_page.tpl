@@ -10,13 +10,23 @@
 	{$buttonChangeSettingData}
 </div>
 
-<div id='background_form' hidden="">
-	<form>
-		<input type='file' name='file'>
-		<input type="text" name="article" placeholder="Добавьте описание">
-		<input type='text' name='hashtags' placeholder="Добавьте хештеги">
-		<input type="submit" name="Опубликовать">
+<div id='background_form' class='hidden'>
+	<div id='form_publications'>
+		<input type='file' name='file' id='file' multiple=""><br>
+		<p>Описание</p>
+		<textarea name="article" id='article' rows='5' cols="30"></textarea><br>
+		<p>Хештеги</p>
+		<textarea name='hashtags' id='hashtags' rows='5' cols="30"></textarea><br>
+		<button name="Опубликовать" onclick='addPublication(); return false;' >Опубликовать</button>
+		<p id='message'></p>
+	</div>
 
-	</form>
 </div>
 	
+
+	{foreach from=$publications key=k item=value}
+
+		<img src="/img/users_publications/{$value.img}" alt='' height='100'>
+
+
+	{/foreach}

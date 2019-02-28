@@ -31,4 +31,9 @@ class SqlRequest{
 	public $insert_user_mail_vk = 'INSERT INTO mails (`parent_id`, `mail`) VALUES (?,?)';
 	//Извлечение пользователя по id
 	public $insert_user_by_id = 'SELECT * FROM users WHERE id=?';
+	//Добавление публикации
+	public $sql_add_publication = 'INSERT INTO publications (`parent_id`, `img`, `title`) VALUES (?,?,?)';
+	//Добавление хештега
+	public $sql_add_hashtag = 'INSERT INTO hashtags (`parent_id_publication`, `hashtag`) VALUES (?,?)';
+
 }

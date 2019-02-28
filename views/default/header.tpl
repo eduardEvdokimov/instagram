@@ -5,14 +5,33 @@
 	<link href='{$TemplateWebPath}/css/main.css' rel='stylesheet'>
 	<script src='/js/jquery.js' type='text/javascript'></script>
 	<script src='/js/main.js' type='text/javascript'></script>
+	<script type="text/javascript">
 
+		$(document).click(function(e) {
+				  
+			if(e.target.id == 'new_pub')
+				return;
+			
+       		if($(e.target.closest('#form_publications')).length)	
+         		return;
+       		
+    		$('#background_form').fadeOut();
+    		$('#form_publications').fadeOut();
+
+  		});
+  
+		
+			
+		
+		
+	</script> 
 	<meta charset="utf-8">
 </head>
 <body>
 	<header>
 		<div id='header_content'>
 			<h1><a href='http://instagram/'>Instagram</a></h1>
-			<form>
+			<form id='searh_form'>
 				<input type="text" name="searh">
 				<input type="submit" name="sub" value='Найти'>
 			</form>

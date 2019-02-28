@@ -1,6 +1,7 @@
 <?php
 require_once '../config/db.php'; //подключаемся к базе данных
 require_once '../models/UsersModel.php'; //работаем с бд
+require_once '../models/PublicationModel.php';
 
 function indexAction(Smarty $smarty)
 {
@@ -11,13 +12,13 @@ function indexAction(Smarty $smarty)
 	$template = '/default'; // Название папки с файлами веб пространства для дефолтного шаблона
 	$userProfileUrl = 'http://instagram/user/' . $user['id'] . '/'; //url на персональную страницу пользователя
 	
+	$publications = getUserPublication($GLOBALS['connection'], $user['id']);
+
 	
-
-
 	//Проверяем пользователь открывает свою страницу или другого пользователя
 	if($user['id'] == $_GET['id']){
 		//Если свою, формируем кнопки добавления публикации и редактирования профиля
-		$buttonAddPublications = "<button onclick='showForm()'>Добавить фото</button>";
+		$buttonAddPublications = "<button onclick='showForm()' id='new_pub'>Новая публикация</button>";
 		$buttonChangeSettingData = "<button>Редактировать профиль</button>";
 
 		$smarty->assign('AddPublications', $buttonAddPublications);
@@ -40,7 +41,7 @@ function indexAction(Smarty $smarty)
 		}
 	}
 
-
+	$smarty->assign('publications', $publications);
 	
 	$smarty->assign('userLogin', $user['login']);
 	$smarty->assign('userAvatarPath', $userAvatarPath);
@@ -65,8 +66,9 @@ function indexAction(Smarty $smarty)
 //Подписка на пользователя
 function subscribeAction()
 {
-
+	
 	$result;
+	
 	if(addSubscribe($GLOBALS['connection'], $_POST['id_subscriber'], $_POST['sub_object'])){
 		$result = true;
 	}else{
