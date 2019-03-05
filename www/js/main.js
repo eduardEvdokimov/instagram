@@ -145,6 +145,8 @@ function showForm()
 	$('#background_form').removeClass('hidden');
 	$('#background_form').addClass('background_form_show');
 	$('#form_publications').fadeIn();
+	//отмена скрола страницы
+	$("body").css("overflow","hidden");
 }
 
 

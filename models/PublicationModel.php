@@ -76,6 +76,11 @@ function addPublication($connection, $user_id, $photo, $title, $hashtags)
 }
 
 
+/*
+param connection Object PDO
+param user_id int 
+	Извлекает из БД 12 последних публикаций
+*/
 function getUserPublication($connection, $user_id)
 {
 	$select_user_publications = 'SELECT * FROM publications WHERE parent_id=?  ORDER BY pub_date DESC LIMIT 12';
@@ -84,9 +89,25 @@ function getUserPublication($connection, $user_id)
 
 	if($sql->execute([$user_id])){
 		$array = $sql->fetchAll(PDO::FETCH_ASSOC);
-		echo '<pre>';
-		var_dump($array);
-		echo '</pre>';
+		return $array;
+	}
+}
+
+/*
+param connection Object PDO
+param user_id int 
+param count_pub int 
+	Извлекает 12 записей начиная с опреденной позиции. 
+	Служит для ассинхронной подгрузки публикаций на страницу. 
+*/
+function loadingPublication($connection, $user_id, $count_pub){
+
+	$load_user_pub = "SELECT * FROM publications WHERE parent_id=? ORDER BY pub_date DESC LIMIT {$count_pub}, 12";
+
+	$sql = $connection->prepare($load_user_pub);
+	
+	if($sql->execute([$user_id])){
+		$array = $sql->fetchAll(PDO::FETCH_ASSOC);
 		return $array;
 	}
 }

@@ -3,6 +3,7 @@
 <head>
 	<title>{$title}</title>
 	<link href='{$TemplateWebPath}/css/main.css' rel='stylesheet'>
+	<link rel='stylesheet' href='/fontawesome/css/all.css'>
 	<script src='/js/jquery.js' type='text/javascript'></script>
 	<script src='/js/main.js' type='text/javascript'></script>
 	<script type="text/javascript">
@@ -17,8 +18,12 @@
        		
     		$('#background_form').fadeOut();
     		$('#form_publications').fadeOut();
+    		$("body").css("overflow","auto");
 
   		});
+
+		
+  		
   
 		
 			
@@ -29,6 +34,7 @@
 </head>
 <body>
 	<header>
+		<p id='p'></p>
 		<div id='header_content'>
 			<h1><a href='http://instagram/'>Instagram</a></h1>
 			<form id='searh_form'>

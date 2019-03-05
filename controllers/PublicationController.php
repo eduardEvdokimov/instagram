@@ -3,8 +3,6 @@
 require_once '../models/PublicationModel.php';
 require_once '../config/db.php';
 
-
-
 //Добавление публикации в БД
 function addPublicationAction()
 {
@@ -25,5 +23,13 @@ function addPublicationAction()
 		$result['success'] = 'Публикация успешно добавлена';
 		echo json_encode($result);
 	}
+}
+
+//Подгрузка новых публикаций на страницу
+function loadingAction()
+{	
+	$publications = loadingPublication($GLOBALS['connection'], $_POST['user_id'], $_POST['count_pub']);
+
+	echo json_encode($publications);
 }
 
