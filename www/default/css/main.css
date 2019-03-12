@@ -55,7 +55,7 @@ footer{
 
 .table_publications{
 	width: 100%;
-	margin: 0 auto;
+
 	background: red;
 	
 	
@@ -79,14 +79,13 @@ footer{
 	z-index: 1;
 }
 
-.item_publication > a > img{
+.item_publication >  img{
 	width: 100%;
 	height: 100%;
 }
 
 .background_publication{
 	opacity: 0.0;
-	
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -104,3 +103,126 @@ footer{
 	margin-top: 128px;
 	text-align: center;
 }
+
+.background_window_pub{
+	position: absolute;
+	top:0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 3;
+}
+
+.visible_big_publication{
+	position: fixed;
+	top: 10%;
+	left: 15%;
+	width: 70%;
+	height: 600px;
+	background: white;
+	margin: 0 auto;
+}
+
+.visible_big_publication > #photo_publication{
+	width: 60%;
+	height: 100%;
+}
+
+#right_block_pub{
+	float: right;
+	width: 40%;
+	height: 100%;
+}
+
+#right_block_pub > #head_window{
+	width: 94%;
+	margin: 0 3% 0 3%;
+	height: 10%;
+	
+	border-bottom: 1px solid silver;
+}
+
+#right_block_pub > #head_window > img{
+	float: left;
+	width: 45px;
+	border-radius: 50%;
+	margin: 3% 3% 3% 0;
+
+}
+
+#right_block_pub > #head_window > #user_login{
+	float: left;
+	vertical-align: top;
+	margin-top: 6%;
+
+}
+
+
+
+#right_block_pub > #article_publication{
+	float: left;
+	margin: 0 0 0 3%;
+	height: 10%;
+	overflow-wrap: break-word;
+	overflow: auto;
+	width: 97%;
+	
+	padding-top: 3%; 
+	
+}
+
+#right_block_pub > .hashtags{
+	float: left;
+	width: 97%;
+	height: 10%;
+	overflow-wrap: break-word;
+	overflow: auto;
+	margin: 3% 0 0 3%;
+	
+}
+
+#right_block_pub > #list_comments{
+	float: left;
+	width: 97%;
+	height: 38%;
+	
+	overflow-wrap: break-word;
+	overflow: auto;
+	margin: 0 0 0 3%;
+}
+
+#right_block_pub > input{
+	float: left;
+	width: 94%;
+	height: 3%;
+	outline: none;
+	border: none;
+	padding: 3%;
+	
+}
+
+#right_block_pub > #buttons{
+	float: left;
+	width: 94%;
+	margin: 3% 3% 0 3%;
+	height: 15%;
+	padding-top: 3%;
+	border-top: 1px solid silver;
+	border-bottom: 1px solid silver;
+	
+}
+
+#right_block_pub > #buttons > button{
+	border: none;
+	background: none;
+	cursor: pointer;
+	outline: none;
+}
+
+
+#right_block_pub > #buttons > button > img{
+	width: 30px;
+
+}
+

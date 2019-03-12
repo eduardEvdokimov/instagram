@@ -16,7 +16,6 @@ function addPublicationAction()
 						$_POST['hashtags']);
 
 	if(is_array($data)){
-
 		echo json_encode($data);
 
 	}elseif($data == true){
@@ -31,5 +30,15 @@ function loadingAction()
 	$publications = loadingPublication($GLOBALS['connection'], $_POST['user_id'], $_POST['count_pub']);
 
 	echo json_encode($publications);
+}
+
+
+function getPublicationAction(){
+	
+	$result = getFullDataPublication($GLOBALS['connection'], $_POST['pub_id']);
+	
+
+	echo json_encode($result);
+
 }
 

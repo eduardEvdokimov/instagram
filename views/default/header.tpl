@@ -3,36 +3,16 @@
 <head>
 	<title>{$title}</title>
 	<link href='{$TemplateWebPath}/css/main.css' rel='stylesheet'>
+	
 	<link rel='stylesheet' href='/fontawesome/css/all.css'>
 	<script src='/js/jquery.js' type='text/javascript'></script>
 	<script src='/js/main.js' type='text/javascript'></script>
 	<script type="text/javascript">
-
-		$(document).click(function(e) {
-				  
-			if(e.target.id == 'new_pub')
-				return;
-			
-       		if($(e.target.closest('#form_publications')).length)	
-         		return;
-       		
-    		$('#background_form').fadeOut();
-    		$('#form_publications').fadeOut();
-    		$("body").css("overflow","auto");
-
-  		});
-
-		
-  		
-  
-		
-			
-		
 		
 	</script> 
 	<meta charset="utf-8">
 </head>
-<body>
+<body lang="ru">
 	<header>
 		<p id='p'></p>
 		<div id='header_content'>

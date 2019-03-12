@@ -32,8 +32,18 @@ class SqlRequest{
 	//Извлечение пользователя по id
 	public $insert_user_by_id = 'SELECT * FROM users WHERE id=?';
 	//Добавление публикации
-	public $sql_add_publication = 'INSERT INTO publications (`parent_id`, `img`, `title`) VALUES (?,?,?)';
+	public $sql_add_publication = 'INSERT INTO publications (`public_id`, `parent_id`, `img`, `title`) VALUES (?,?,?,?)';
 	//Добавление хештега
 	public $sql_add_hashtag = 'INSERT INTO hashtags (`parent_id_publication`, `hashtag`) VALUES (?,?)';
-
+	//Извлечение 12 последнедобавленных публикаций пользователя
+	public $select_user_publications = 'SELECT * FROM publications WHERE parent_id=?  ORDER BY pub_date DESC LIMIT 12';
+	//Возвращает количество комментариев для определенной публикации
+	public $select_count_comment = 'SELECT COUNT(*) FROM comments WHERE parent_id_publication=?';
+	
+	//Извлечение публикации по public_id
+	public $select_pub_public_id = 'SELECT * FROM publications WHERE public_id=?';
+	//Извлечение хештегов отдельной публикации
+	public $select_hastags_pub = 'SELECT hashtag FROM hashtags WHERE parent_id_publication=?';
+	//Извлечение из 2-х таблиц (users, comments) комментариев и их авторов определенной публикации
+	public $select_comment_pub = 'SELECT comments.*, users.id, users.login FROM comments, users WHERE comments.parent_id_publication=? AND users.id=comments.parent_id_user ORDER BY pub_date DESC';
 }

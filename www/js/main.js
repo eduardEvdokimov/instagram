@@ -155,9 +155,6 @@ function showForm()
 
 function addPublication()
 {
-
-
-	
 	var title = $('#article').val();
 	var hashtags = $('#hashtags').val();
 	var url = window.location.pathname;
@@ -166,7 +163,6 @@ function addPublication()
 	var form = $('#form_publications');
 	var message = $('#message');
 
-
 	if($('#file')[0].files.length > 0)
 		var file = $('#file')[0].files;
 	else{
@@ -174,15 +170,12 @@ function addPublication()
 		return false;
 	}
 
-
 	var formData = new FormData();
 
 	formData.append('title', title);
 	formData.append('hashtags', hashtags);
 	formData.append('file', file[0]);
 	formData.append('user_id', user_id);
-	
-		
 	
 	$.ajax({
 		type: 'post',
@@ -198,7 +191,7 @@ function addPublication()
 
 		},
 		success: function(data){
-			form.find('input').prop('disabled', false);
+			console.log(data);
 			if(data['image']){
 				message.text(data['image']);
 			}
@@ -214,11 +207,16 @@ function addPublication()
 		},
 		complete: function(){
 			form.find('input').prop('disabled', false);
+
 		},
 		error: function(){
 			message.text('Ошибка отправки');
-			
 		}
 
 	});
+}
+
+//Установка фокуска на элемент
+function setFocus(element){
+	$(element).focus();
 }

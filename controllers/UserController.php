@@ -5,14 +5,14 @@ require_once '../models/PublicationModel.php';
 
 function indexAction(Smarty $smarty)
 {
-	
 	//Формируем массив с данными пользователя 
 	$user = createArraySmarty($_SESSION['user']);
 	$userAvatarPath = '/img/users_avatar/' . $user['avatar']; //Путь к аватарке пользователя
 	$template = '/default'; // Название папки с файлами веб пространства для дефолтного шаблона
 	$userProfileUrl = 'http://instagram/user/' . $user['id'] . '/'; //url на персональную страницу пользователя
 	
-	$publications = getUserPublication($GLOBALS['connection'], $user['id']);
+
+	$publications = getUserPublication($GLOBALS['connection'], $_GET['id']);
 
 	
 	//Проверяем пользователь открывает свою страницу или другого пользователя
