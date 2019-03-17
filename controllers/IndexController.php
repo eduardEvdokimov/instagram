@@ -5,9 +5,9 @@
 
 function indexAction(Smarty $smarty)
 {
-	$user = createArraySmarty($_SESSION['user']);
+	$user = $_SESSION['user'];
 	$userAvatarPath = '/img/users_avatar/' . $user['avatar']; //путь к аватарке пользователя
-	$userProfileUrl = 'http://instagram/user/' . $user['id'] . '/'; //url на персональную страницу пользователя
+	$userProfileUrl = 'http://instagram/user/' . $user['login'] . '/'; //url на персональную страницу пользователя
 
 	$template = 'default'; // Название папки с файлами веб пространства для дефолтного шаблона
 

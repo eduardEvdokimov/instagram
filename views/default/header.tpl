@@ -18,12 +18,12 @@
 		<div id='header_content'>
 			<h1><a href='http://instagram/'>Instagram</a></h1>
 			<form id='searh_form'>
-				<input type="text" name="searh">
+				<input type="text" name="searh" placeholder="Поиск">
 				<input type="submit" name="sub" value='Найти'>
 			</form>
 			<div id='userInfo'>
 				<img src='{$userAvatarPath}' alt='asdsa' height="20">
-				<a href='{$urlProfile}'>{$userLogin}</a>
+				<a href='{$urlProfile}' id='my+login'>{$userLogin}</a>
 			</div>
 		</div>
 	</header>

@@ -13,21 +13,8 @@ function indexAction(Smarty $smarty)
 
 //Авторизация пользователя
 function loginAction()
-{
-	$result = ['error' => '']; 
-
-
-	$login_mail = isset($_REQUEST['login_mail']) ? $_REQUEST['login_mail'] : null;
-	$password = isset($_REQUEST['password']) ? $_REQUEST['password'] : null;
-
-	//Проверка заполнены ли поля
-	if(empty($login_mail) || empty($password)){
-		$result['error'] = 'Заполните все поля'; 
-		echo json_encode($result);
-		exit();
-	}
-
-	$data = loginUser($GLOBALS['connection'], $login_mail, $password);
+{ 
+	$data = loginUser($GLOBALS['connection'], $_POST['login_mail'], $_POST['password']);
 
 	//Если пользоваетель не найден в БД, в data будет false
 	if(!$data){
@@ -38,8 +25,8 @@ function loginAction()
 		//Если пользователь найден в БД
 		$_SESSION['user'] = $data;
 		$_SESSION['auth'] = true;
-		$data['login_mail'] = $login_mail;
-		$data['password'] = $password; 
+		$data['login_mail'] = $_POST['login_mail'];
+		$data['password'] = $_POST['password']; 
 		$data['success'] = true;
 		echo json_encode($data);
 	}
@@ -83,13 +70,10 @@ function loginVKAction()
 }
 
 
-
-
 //Выход из учетной записи
 function logOutAction()
 {
 	$_SESSION = [];
 	header('Location: http://instagram/');
-
 }
 

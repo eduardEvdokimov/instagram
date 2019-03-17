@@ -36,15 +36,21 @@ function loadTemplate($smarty, $templateName)
 
 
 /*
-param array array
-	Функция формирования удобного массива для шаблонизатора
+param connection PDO object
+param login string
+	Извлекает и БД данные пользователя по логину.
+	Если не удалось извлечь, или пользователь не найден возвращает false, иначе ассоциативный массив с данными пользователя
 */
+function getDataUserInLogin(PDO $connection, $login){
+	//Извлекаем пользователя по логину, чтобы узнать его id
+	$sql = $connection->prepare($GLOBALS['SQL']->select_user_from_login);
 
-function createArraySmarty($array)
-{
-	$result = array();
-	foreach($array as $key => $value){
-		$result[$key] = $value;
-	}
-	return $result;
+	if(!$sql->execute([$login]))
+		return false;// Если не удалось извлечь пользователя 
+
+	$user = $sql->fetch(PDO::FETCH_ASSOC);
+
+	if(empty($user)) return false; //Если пользователь не найден в БД
+
+	return $user;
 }

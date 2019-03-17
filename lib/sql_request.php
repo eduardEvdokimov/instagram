@@ -45,5 +45,32 @@ class SqlRequest{
 	//Извлечение хештегов отдельной публикации
 	public $select_hastags_pub = 'SELECT hashtag FROM hashtags WHERE parent_id_publication=?';
 	//Извлечение из 2-х таблиц (users, comments) комментариев и их авторов определенной публикации
-	public $select_comment_pub = 'SELECT comments.*, users.id, users.login FROM comments, users WHERE comments.parent_id_publication=? AND users.id=comments.parent_id_user ORDER BY pub_date DESC';
+	public $select_comment_pub = 'SELECT comments.*, users.login FROM comments, users WHERE comments.parent_id_publication=? AND users.id=comments.parent_id_user ORDER BY pub_date DESC';
+
+	//Извлечение пользователя по логину
+	public $select_user_from_login = 'SELECT * FROM users WHERE login=?';
+	//Добавляет запись в таблицу comments
+	public $add_comment = 'INSERT INTO comments (`parent_id_user`, `parent_id_publication`, `comment`) VALUES (?,?,?)';
+
+	//Извлекает все из таблицы likes_publications и id из таблицы publications по id. 
+	//Нужно для проверки лайкал ли пользователь данную публикацию или нет
+	public $check_line_like = 'SELECT likes_publications.*, publications.id FROM likes_publications, publications WHERE publications.public_id=? AND likes_publications.user_id=? AND likes_publications.publication_id=publications.id';
+	//Извлекает поле из таблицы likes_comments. Для проверки лайкал ли пользователь данный комментарий
+	public $check_press_like_comm = 'SELECT * FROM likes_comments WHERE id_user=? AND id_comment=?';
+	//Идаляет запись из таблицы likes_comments
+	public $drop_like_comment = 'DELETE FROM likes_comments WHERE id_user=? AND id_comment=?';
+	//Уменьшает количество лайков комментария на 1
+	public $decrement_like_comment = 'UPDATE comments SET likes = likes - 1 WHERE id=?';
+	//Добавляет поле в таблицу likes_comments
+	public $add_like_comment = 'INSERT INTO likes_comments VALUES (?,?)';
+	//Увеличивает количество лайков у комментария на 1
+	public $increment_like_comment = 'UPDATE comments SET likes = likes + 1 WHERE id=?';
+	//Добавление поля в таблицу likes_publications
+	public $add_like_publication = 'INSERT INTO likes_publications VALUES (?,?)';
+	//Увеличение лайков у публикации
+	public $increment_like = 'UPDATE publications SET likes = likes + 1 WHERE id=?';
+	//Удаление поля из таблицы likes_publications
+	public $del_like_publication = 'DELETE FROM likes_publications WHERE user_id=? AND publication_id=?';
+	//Уменьшение количества лайков публикации
+	public $decrement_likes = 'UPDATE publications SET likes = likes - 1 WHERE id=?';
 }

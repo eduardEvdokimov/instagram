@@ -12,12 +12,9 @@ param login string
 param mail string
 	Проверка слуществует ли пользователь с таким логином и электронной почтой
 */
-function checkExistLoginMail($connection, $login, $mail)
+function checkExistLoginMail(PDO $connection, $login, $mail)
 {
 	$result = ['error' => '']; // Массив ошибок
-
-	
-
 
 	// Проверка существует ли пользователь с таким логином
 	$sql = $connection->prepare($GLOBALS['SQL']->sql_check_login);
@@ -53,7 +50,7 @@ param password string
 param name string
 	Добавление нового пользователя в БД (Регистрация)
 */
-function registerUserAction($connection, $login, $mail, $password, $name)
+function registerUserAction(PDO $connection, $login, $mail, $password, $name)
 {
 	
 
@@ -118,11 +115,9 @@ function confirmedAccaunt($connection, $key)
 
 
 
-function loginUser($connection, $login_mail, $password)
+function loginUser(PDO $connection, $login_mail, $password)
 {
 	$result = array();
-
-	
 
 
 	$sql = $connection->prepare($GLOBALS['SQL']->sql_select_user);
@@ -181,13 +176,16 @@ function checkPassword($hash, $password)
 }
 
 //Добавление новой подписки
-function addSubscribe($connection, $id_subscriber, $sub_object)
+function addSubscribe($connection, $user_id, $login_subscribe)
 {	
-	
+	$user = getDataUserInLogin($connection, $login_subscribe);
+
+	if($user == false) return false;
+
 
 	$sql = $connection->prepare($GLOBALS['SQL']->sql_add_sub);
 
-	if($sql->execute([$id_subscriber, $sub_object])){
+	if($sql->execute([$user_id, $user['id']])){
 		return true;
 	}
 	else{
@@ -195,26 +193,33 @@ function addSubscribe($connection, $id_subscriber, $sub_object)
 	}
 }
 
-function deletSubscribe($connection, $id_subscriber, $sub_object)
+function deletSubscribe(PDO $connection, $user_id, $login_subscribe)
 {
-	
+	$user = getDataUserInLogin($connection, $login_subscribe);
+
+	if($user == false) return false;
+
 
 	$sql = $connection->prepare($GLOBALS['SQL']->sql_drop_sub);
 
-	if($sql->execute([$id_subscriber, $sub_object]))
+	if($sql->execute([$user_id, $user['id']]))
 		return true;
 	else
 		return false;
 }
 
 //Проверка подписан ли пользователь на открытый аккаунт
-function checkSubscribe($connection, $id_subscriber, $sub_object)
+function checkSubscribe(PDO $connection, $user_id, $login_subscribe)
 {
+	$user = getDataUserInLogin($connection, $login_subscribe);
+
+	if($user == false) return false;
 	
+
 
 	$sql = $connection->prepare($GLOBALS['SQL']->sql_check);
 
-	$sql->execute([$id_subscriber, $sub_object]);
+	$sql->execute([$user_id, $user['id']]);
 
 	$data = $sql->fetch(PDO::FETCH_ASSOC);
 	
@@ -232,7 +237,7 @@ param data array
 	Авторизация пользователя по аккаунту соц. сети Вконтакте
 */
 
-function registrationVK($connection, $data)
+function registrationVK(PDO $connection, $data)
 {	
 	$variable = array(); // Промежуточные данные
 
@@ -294,3 +299,4 @@ function registrationVK($connection, $data)
 	}
 
 }
+

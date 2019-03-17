@@ -3,7 +3,7 @@
 <head>
 	<title>Вход</title>
 	<meta charset='utf-8'>
-	<script src='/js/main.js'></script>
+	<script src='/js/users_script.js'></script>
 	<script src='/js/jquery.js'></script>
 </head>
 <body>
