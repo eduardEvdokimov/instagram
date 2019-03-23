@@ -3,6 +3,9 @@
 	Основные функции нужные по всему сайту
 */
 require_once '../config/config.php';
+require_once '../lib/sql_request.php'; //Файл с запросами к БД
+$GLOBALS['SQL'] = new SqlRequest(); //Объект со всеми запросами к БД
+
 
 //Загружает страницу по заданному контроллеру и заданной функции
 function loadPage($controllerName, $actionName)
@@ -44,7 +47,7 @@ param login string
 function getDataUserInLogin(PDO $connection, $login){
 	//Извлекаем пользователя по логину, чтобы узнать его id
 	$sql = $connection->prepare($GLOBALS['SQL']->select_user_from_login);
-
+	
 	if(!$sql->execute([$login]))
 		return false;// Если не удалось извлечь пользователя 
 

@@ -137,14 +137,26 @@ function loginUser()
 }
 
 //Подписка на новый аккаунт
-function subscribe()
+function subscribe(event)
 {
+
 	var data = {};
 	//Получаем id подпичика
 	data['user_login'] = $('#id_subscriber').val();
 	//Получаем id объекта подписки (на кого подписываются)
 	data['sub_object'] = $('#sub_object').val();
+	console.log(data['sub_object']);
+	if(data['sub_object'] == undefined){
+		var element_li = event.target.closest('li');
+		//Делаем скрыпт универсальным. Записываем из списка самых 
+		//популярных пользователей логин, на кого хотим подписаться.
+		//В data['sub_object'] будет либо значение поля #sub_object либо li.id 
+		//в зависимости на какой старнице отрабатывает скрипт
+		data['sub_object'] = element_li.id;
+		var is_list_users = true;
+	}
 	
+
 	$.ajax({
 		type: 'post',
 		data: data,
@@ -152,11 +164,16 @@ function subscribe()
 		success: function(data){
 			console.log(data);
 			if(data == true){
-				//Если ошибок по серверной части не возникло
+				if(is_list_users){
+					$(element_li).children('#sub').removeClass('show').addClass('hidden');
+					$(element_li).children('#unsub').removeClass('hidden').addClass('show');
+				}else{
+					//Если ошибок по серверной части не возникло
 				//Скрываем кнопку подписки
 				$('#sub').removeClass('show').addClass('hidden');
 				//Отображаем кнопку отписки
 				$('#unsub').removeClass('hidden').addClass('show');
+				}
 			}
 		},
 		error: function(){
@@ -175,6 +192,16 @@ function unSubscribe()
 	//Получаем id объекта подписки (на кого подписываются)
 	data['sub_object'] = $('#sub_object').val();
 	
+	if(data['sub_object'] == undefined){
+		var element_li = event.target.closest('li');
+		//Делаем скрыпт универсальным. Записываем из списка самых 
+		//популярных пользователей логин, на кого хотим подписаться.
+		//В data['sub_object'] будет либо значение поля #sub_object либо li.id 
+		//в зависимости на какой старнице отрабатывает скрипт
+		data['sub_object'] = element_li.id;
+		var is_list_users = true;
+	}
+
 	$.ajax({
 		type: 'post',
 		data: data,
@@ -182,11 +209,19 @@ function unSubscribe()
 		success: function(data){
 			console.log(data);
 			if(data == true){
-				//Если ошибок по серверной части не возникло
-				//Отображаем кнопку подписки
-				$('#sub').addClass('show').removeClass('hidden');
-				//Скрываем кнопку отписки
-				$('#unsub').addClass('hidden').removeClass('show');
+
+				if(is_list_users){
+					$(element_li).children('#sub').removeClass('hidden').addClass('show');
+					$(element_li).children('#unsub').removeClass('show').addClass('hidden');
+				}else{
+					//Если ошибок по серверной части не возникло
+					//Отображаем кнопку подписки
+					$('#sub').addClass('show').removeClass('hidden');
+					//Скрываем кнопку отписки
+					$('#unsub').addClass('hidden').removeClass('show');
+				}
+
+				
 			}
 		},
 		error: function(){

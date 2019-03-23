@@ -101,7 +101,7 @@ function showBigPublication(event){
 		contentType: false,
 		dataType: 'json',
 		beforeSend: function(){
-			$('ul').html('');
+			$('#list_comments').html('');
 			$('.hashtags').html('');
 		},
 		success: function(data){
@@ -129,15 +129,15 @@ function showBigPublication(event){
 						
 					comment += "<p id='pub_date_comment'>" + item['pub_date'] + "</p></li>";
 
-					$('ul').append(comment);
+					$('#list_comments').append(comment);
 				});				
 			}
 			
 			if(data['like'] == 1){
-				$('#button_like').attr('onclick', 'delLike()');
+				$('#button_like').attr('onclick', 'delLike(event)');
 				$('#button_like > img').attr('src', '/img/cyte/heart_red.png');
 			}else{
-				$('#button_like').attr('onclick', 'addLike()');
+				$('#button_like').attr('onclick', 'addLike(event)');
 				$('#button_like > img').attr('src', '/img/cyte/heart.png');
 			}
 
@@ -169,13 +169,20 @@ function showBigPublication(event){
 	});
 }
 
-
+//Установка фокуска на элемент
+function setFocus(element){
+	$(element).focus();
+}
 
 //Добавление комментария публикации
 function addComment(event){
 	//Проверяем нажал ли пользователь на enter
 	if(event.keyCode == 13){
-		object = $(event.target); //Получаем JQuery объект элемента на который нажали
+	
+		var object = $(event.target);
+		var comment = $(event.target).val(); //Получаем значение инпута (комментарий)
+		//Ищем родителя object с классом visible_big_publication и извлекаем его id
+		var id_publication = $(event.target).closest('.visible_big_publication').attr('id');	
 
 		if(object.val()){
 			//Если инпут не пустой проверяем на пробелы
@@ -189,10 +196,6 @@ function addComment(event){
 				$('#addComment').val('');
 			}else{
 				//Если инпут не пустой и не заполнен одними пробелами
-
-				var comment = object.val(); //Получаем значение инпута (комментарий)
-				//Ищем родителя object с классом visible_big_publication и извлекаем его id
-				var id_publication = object.closest('.visible_big_publication').attr('id');	
 				var data = new FormData();
 				data.append('comment', comment);
 				data.append('public_id', id_publication);
@@ -204,8 +207,10 @@ function addComment(event){
 					contentType: false,
 					success: function(data){
 						console.log(data);
-						var user_login = $('#user_login').html(); //Извлекаем из тега логин пользователя публикации
+						var user_login = $('#my_login').html(); //Извлекаем из тега логин пользователя публикации
 						if(data){
+					
+							//Если скрипт запущен на странице пользователя
 							//Если true, формируем переменную для отображения комментария на странице
 							var content = '<li id=\'' + data + '\'><p class=item_comment><span id=login>' + user_login + '</span>&ensp;<span id=comment>' + comment + '</span></p>';
 							content += "<button onclick='addLikeComment(event);'><span id='count_like_comment'>0</span>&ensp;<img src='/img/cyte/heart.png' alt=''></button>";
@@ -217,10 +222,13 @@ function addComment(event){
 							// Ищем в JQuery объекте блок с классом fa-comment и извлекаем его
 							var comments = publication.find('.fa-comment');
 							//Увеличиваем количество комментариев на 1
-							comments.html(Number(comments.html()) + 1);
+							comments.html(Number(comments.html()) + 1);	
+						
+
 						}else{
 							alert('Не удалось добавить комментарий. Попробуйте позже.');
 						}
+
 						//Переводим инпут ввода комментария в значение по умолчанию
 						$('#addComment').val('').removeClass('comment_error').prop('placeholder', 'Добавьте комментарий...');
 
@@ -236,8 +244,11 @@ function addComment(event){
 
 
 //Добавляет лайк публикации
-function addLike(){
+function addLike(event){
 	var publication_id = $('.visible_big_publication').attr('id');
+	
+	
+
 
 	var data = new FormData();
 	data.append('publication_id', publication_id);
@@ -249,17 +260,20 @@ function addLike(){
 		processData: false,
 		contentType: false,
 		success: function(data){
-			//Меняем картинку на закрашенное сердце
-			$('#button_like > img').attr('src', '/img/cyte/heart_red.png');
-			//Меняем значение onclick на функцию удаления лайка
-			$('#button_like').attr('onclick', 'delLike()');
-			//Увеличиваем количество лайков на 1
-			$('#buttons > p > span').html(Number($('#buttons > p > span').html()) + 1);
 
-			//Увеличиваем количество лайков на 1 на главной странице
-			var publication = $('.center_content').children('#' + publication_id);
-			var likes = publication.find('.fa-heart');
-			likes.html(Number(likes.html()) + 1);
+			
+				//Меняем картинку на закрашенное сердце
+				$('#button_like > img').attr('src', '/img/cyte/heart_red.png');
+				//Меняем значение onclick на функцию удаления лайка
+				$('#button_like').attr('onclick', 'delLike(event)');
+				//Увеличиваем количество лайков на 1
+				$('#buttons > p > span').html(Number($('#buttons > p > span').html()) + 1);
+
+				//Увеличиваем количество лайков на 1 на главной странице
+				var publication = $('.center_content').children('#' + publication_id);
+				var likes = publication.find('.fa-heart');
+				likes.html(Number(likes.html()) + 1);
+			
 		},
 		error: function(){
 			alert('Произошла ошибка. Попробуйте позже.');
@@ -267,8 +281,10 @@ function addLike(){
 	});
 }
 
-function delLike(){
+function delLike(event){
 	var publication_id = $('.visible_big_publication').attr('id');
+
+
 
 	var data = new FormData();
 	data.append('publication_id', publication_id);
@@ -280,17 +296,20 @@ function delLike(){
 		processData: false,
 		contentType: false,
 		success: function(data){
-			//Меняем картинку на пустое сердце
-			$('#button_like > img').attr('src', '/img/cyte/heart.png');
-			//Меняем значение onclick на функцию добавления лайка
-			$('#button_like').attr('onclick', 'addLike()');
-			//Уменьшаем количество лайков на 1
-			$('#buttons > p > span').html(Number($('#buttons > p > span').html()) - 1);
 
-			//Уменьшаем количество лайков на 1 на главной странице
-			var publication = $('.center_content').children('#' + publication_id);
-			var likes = publication.find('.fa-heart');
-			likes.html(Number(likes.html()) - 1);
+			
+				//Меняем картинку на пустое сердце
+				$('#button_like > img').attr('src', '/img/cyte/heart.png');
+				//Меняем значение onclick на функцию добавления лайка
+				$('#button_like').attr('onclick', 'addLike(event)');
+				//Уменьшаем количество лайков на 1
+				$('#buttons > p > span').html(Number($('#buttons > p > span').html()) - 1);
+
+				//Уменьшаем количество лайков на 1 на главной странице
+				var publication = $('.center_content').children('#' + publication_id);
+				var likes = publication.find('.fa-heart');
+				likes.html(Number(likes.html()) - 1);
+			
 		},
 		error: function(){
 			alert('Произошла ошибка. Попробуйте позже.');
@@ -405,6 +424,7 @@ $(document).ready(function(){
 							content += "<span><i class='fas fa-heart'>" + data['likes'] + "</i></span>";
 
 							content += "<span><i class='fas fa-comment'>" + data['count_comment'] + "</i></span><p></div></div>";
+
 
 							$('.center_content').append(content);
 

@@ -4,7 +4,7 @@
 */
 require_once '../lib/sql_request.php'; //Файл с запросами к БД
 require_once '../config/config.php'; //Константы, настройки сайта
-$GLOBALS['SQL'] = new SqlRequest(); //Объект со всеми запросами к БД
+
 
 /*
 param connection PDO object
@@ -182,10 +182,16 @@ function addSubscribe($connection, $user_id, $login_subscribe)
 
 	if($user == false) return false;
 
-
 	$sql = $connection->prepare($GLOBALS['SQL']->sql_add_sub);
 
 	if($sql->execute([$user_id, $user['id']])){
+		//Если запрос прошел успешно, увеличиваем количество подписчиков и подписок на 1
+		$sql = $connection->prepare($GLOBALS['SQL']->add_update_count_subscribers);
+		$sql->execute([$user['id']]);
+		
+		$sql = $connection->prepare($GLOBALS['SQL']->add_update_count_subscriprions);
+		$sql->execute([$user_id]);
+
 		return true;
 	}
 	else{
@@ -199,11 +205,18 @@ function deletSubscribe(PDO $connection, $user_id, $login_subscribe)
 
 	if($user == false) return false;
 
-
 	$sql = $connection->prepare($GLOBALS['SQL']->sql_drop_sub);
 
-	if($sql->execute([$user_id, $user['id']]))
+	if($sql->execute([$user_id, $user['id']])){
+		//Если запрос прошел успешно, уменьшаем количество подписчиков и подписок на 1
+		$sql = $connection->prepare($GLOBALS['SQL']->del_update_count_subscribers);
+		$sql->execute([$user['id']]);
+		
+		$sql = $connection->prepare($GLOBALS['SQL']->del_update_count_subscriprions);
+		$sql->execute([$user_id]);
+
 		return true;
+	}
 	else
 		return false;
 }
@@ -214,8 +227,6 @@ function checkSubscribe(PDO $connection, $user_id, $login_subscribe)
 	$user = getDataUserInLogin($connection, $login_subscribe);
 
 	if($user == false) return false;
-	
-
 
 	$sql = $connection->prepare($GLOBALS['SQL']->sql_check);
 
@@ -223,7 +234,6 @@ function checkSubscribe(PDO $connection, $user_id, $login_subscribe)
 
 	$data = $sql->fetch(PDO::FETCH_ASSOC);
 	
-
 	//Если пользователь подписан, возвращаем true
 	if(!empty($data))
 		return true;
@@ -300,3 +310,16 @@ function registrationVK(PDO $connection, $data)
 
 }
 
+
+function getPopularUsers(PDO $connection, $user_id)
+{
+	$select_popular_users = 'SELECT * FROM users WHERE id != ? ORDER BY count_subscribers DESC LIMIT 20';
+
+	$sql = $connection->prepare($select_popular_users);
+
+	if($sql->execute([$user_id])){
+		$users = $sql->fetchAll(PDO::FETCH_ASSOC);
+		return $users;
+	}else return false;
+
+}

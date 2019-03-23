@@ -73,4 +73,14 @@ class SqlRequest{
 	public $del_like_publication = 'DELETE FROM likes_publications WHERE user_id=? AND publication_id=?';
 	//Уменьшение количества лайков публикации
 	public $decrement_likes = 'UPDATE publications SET likes = likes - 1 WHERE id=?';
+	//Увеличавает количество подписчиков на 1 у пользователя
+	public $add_update_count_subscribers = 'UPDATE users SET count_subscribers = count_subscribers + 1 WHERE id=?';
+	//Увеличивает количество подписок на 1 у пользователя
+	public $add_update_count_subscriprions = 'UPDATE users SET count_subscriptions = count_subscriptions + 1 WHERE id=?';
+	//Уменьшает количество подписчиков на 1
+	public $del_update_count_subscribers = 'UPDATE users SET count_subscribers = count_subscribers - 1 WHERE id=?';
+	//Уменьшает количество подписок на 1
+	public $del_update_count_subscriprions = 'UPDATE users SET count_subscriptions = count_subscriptions - 1 WHERE id=?';
+	//Увеличиваем количество публикаций на 1
+	public $add_count_publications = 'UPDATE users SET count_publications = count_publications + 1 WHERE id=?';
 }

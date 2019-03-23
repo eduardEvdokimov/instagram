@@ -3,13 +3,12 @@
 <head>
 	<title>{$title}</title>
 	<link href='{$TemplateWebPath}/css/main.css' rel='stylesheet'>
-	
+	<link href='{$TemplateWebPath}/css/main_page.css' rel='stylesheet'>
 	<link rel='stylesheet' href='/fontawesome/css/all.css'>
+	<link rel='stylesheet' href='{$TemplateWebPath}/css/list_users.css'>
 	<script src='/js/jquery.js' type='text/javascript'></script>
 	<script src='/js/main.js' type='text/javascript'></script>
-	<script type="text/javascript">
-		
-	</script> 
+	<link href="https://fonts.googleapis.com/css?family=Srisakdi" rel="stylesheet">
 	<meta charset="utf-8">
 </head>
 <body lang="ru">
@@ -23,10 +22,10 @@
 			</form>
 			<div id='userInfo'>
 				<img src='{$userAvatarPath}' alt='asdsa' height="20">
-				<a href='{$urlProfile}' id='my+login'>{$userLogin}</a>
+				<a href='{$urlProfile}' id='my_login'>{$userLogin}</a>
 			</div>
 		</div>
 	</header>
-	<a href='http://instagram/login/logOut/'>Выйти</a>
+	
 	
 	

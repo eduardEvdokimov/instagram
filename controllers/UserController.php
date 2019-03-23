@@ -24,22 +24,27 @@ function indexAction(Smarty $smarty)
 	//Проверяем пользователь открывает свою страницу или другого пользователя
 	if($user['login'] == $user_action['login']){
 		//Если свою, формируем кнопки добавления публикации и редактирования профиля
-		$buttonAddPublications = "<button onclick='showForm()' id='new_pub'>Новая публикация</button>";
-		$buttonChangeSettingData = "<button>Редактировать профиль</button>";
 
-		$smarty->assign('AddPublications', $buttonAddPublications);
-		$smarty->assign('buttonChangeSettingData', $buttonChangeSettingData);
+		$list = "<ul><li id='list_down'><i class='fas fa-angle-down'></i><ul class='hidden'>";
+		
+		$list .= "<li class='show_item'><button onclick='showForm()' id='new_pub'>Новая публикация</button></li>";
+		
+		$list .= "<li class='show_item'><button>Редактировать профиль</button></li>";
+		
+		$list .= "<li class='show_item'><a href='http://instagram/login/logOut/'>Выйти</a></li></ul></li></ul>";
+					
+		$smarty->assign('dropDownList', $list);
 	}else{
 		//Если переходит на чужую страницу
 		//Проверка подписан ли пользователь на этот аккаунт
 		if(checkSubscribe($GLOBALS['connection'], $user['id'], $user_action['login'])){
 			//Если подписан, скрываем кнопку подписаться и отображаем отписаться
-			$buttonSub = "<button class='hidden' onclick='subscribe()' id='sub'>Подписаться</button>";
-			$buttonUnSub = "<button class='show' onclick='unSubscribe()' id='unsub'>Отписаться</button>";
+			$buttonSub = "<button class='hidden' onclick='subscribe(event)' id='sub'>Подписаться</button>";
+			$buttonUnSub = "<button class='show' onclick='unSubscribe(event)' id='unsub'>Отписаться</button>";
 		}
 		else{
-			$buttonSub = "<button class='show' onclick='subscribe()' id='sub'>Подписаться</button>";
-			$buttonUnSub = "<button class='hidden' onclick='unSubscribe()' id='unsub'>Отписаться</button>";
+			$buttonSub = "<button class='show' onclick='subscribe(event)' id='sub'>Подписаться</button>";
+			$buttonUnSub = "<button class='hidden' onclick='unSubscribe(event)' id='unsub'>Отписаться</button>";
 		}
 	}
 
@@ -50,6 +55,10 @@ function indexAction(Smarty $smarty)
 	
 	$smarty->assign('userLogin', $user['login']);
 	$smarty->assign('userAvatarPath', $userAvatarPath);
+
+	$smarty->assign('count_publications', $user_action['count_publications']);
+	$smarty->assign('count_subscribers', $user_action['count_subscribers']);
+	$smarty->assign('count_subscriptions', $user_action['count_subscriptions']);
 
 	$smarty->assign('buttonSub', $buttonSub);
 	$smarty->assign('buttonUnSub', $buttonUnSub);

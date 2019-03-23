@@ -1,0 +1,56 @@
+#document_body{
+	width: 100%;
+	
+	display: inline-block;
+}
+
+#center_block{
+	width: 600px;
+	margin: 50px auto;
+}
+
+#list_users_sub{
+	width: 100%;
+	background: white;
+	border: 1px solid #dedede;
+	border-radius: 3px;
+	display: inline-block;
+}
+
+#list_users_sub > ul{
+	list-style-type: none;
+	float: left;
+	width: 100%;
+}
+
+#list_users_sub > ul > li{
+	float: left;
+	margin-bottom: 10px;
+	width: 100%;
+
+
+}
+
+#list_users_sub > ul > li > img{
+	margin: 5px 5px 1px 10px;
+	border-radius: 50%;
+	width: 40px;
+	height: 40px;
+	float: left;
+}
+
+#list_users_sub > ul > li > p{
+	float: left;
+	margin-top: 15px;
+
+}
+
+#list_users_sub > ul > li > .subscribe_btn{
+	float: right;
+	
+	margin-top: 17px;
+	border: none;
+	cursor: pointer;
+	margin-right: 20px;
+}
+

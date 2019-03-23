@@ -3,7 +3,6 @@
 require_once '../lib/MainFunction.php';
 require_once '../lib/create_relative_date.php'; //Подключаем функцию формирования относительной даты
 require_once '../lib/sql_request.php'; //Подключаем класс со всеми SQL запросами
-$GLOBALS['SQL'] = new SqlRequest(); //Объект со всеми запросами к БД
 
 
 /*
@@ -48,9 +47,15 @@ function addPublication(PDO $connection, $user_login, $photo, $title, $hashtags)
 	$sql = $connection->prepare($GLOBALS['SQL']->sql_add_publication);
 
 	//Проверка, успешно ли выполнен запрос к БД (добавление записи в таблицу publications)
-	if(!$sql->execute([$public_id, $user['id'], $filename_DB, $title])){
-		return false;
-	}
+	if($sql->execute([$public_id, $user['id'], $filename_DB, $title])){
+
+		$idInsertPub = $connection->lastInsertId(); //Получаем id последней добавленной записи
+		
+		//Если запрос прошел успешно, увеличиваем количество публикаций пользователя
+		$sql = $connection->prepare($GLOBALS['SQL']->add_count_publications);
+		$sql->execute([$user['id']]);
+
+	}else return false;
 
 	//Если были переданны хештеги, делаем их валидацию
 	if($hashtags){
@@ -67,7 +72,6 @@ function addPublication(PDO $connection, $user_login, $photo, $title, $hashtags)
 			}
 		}
 
-		$idInsertPub = $connection->lastInsertId(); //Получаем id последней добавленной записи
 
 		$sql = $connection->prepare($GLOBALS['SQL']->sql_add_hashtag);
 
@@ -131,7 +135,6 @@ param count_pub int
 */
 function loadingPublication(PDO $connection, $user_login, $count_pub)
 {
-
 	//Извлечение 12 последнедобавленных публикаций начиная с определенного места
 	$load_user_pub = "SELECT * FROM publications WHERE parent_id=? ORDER BY pub_date DESC LIMIT {$count_pub}, 12";
 
@@ -409,4 +412,61 @@ function delLike(PDO $connection, $user_id, $public_id)
 }
 
 
+function getNewPublications(PDO $connection, $user_id)
+{
+	$select_new_publications = 'SELECT subscribers.*, publications.*, users.login, users.avatar FROM subscribers, publications, users WHERE subscribers.id_subscriber=? AND publications.parent_id=subscribers.sub_object AND users.id=publications.parent_id ORDER BY publications.pub_date DESC LIMIT 12';
+
+
+
+	$sql = $connection->prepare($select_new_publications);
+
+	if(!$sql->execute([$user_id]))
+		return false;
+
+	$publications = $sql->fetchAll(PDO::FETCH_ASSOC);
+	$sql = $connection->prepare($GLOBALS['SQL']->select_comment_pub);
+
+	foreach($publications as $value){
+		//Преобразуем дату публикации в относительный вид
+		$value['pub_date'] = mb_strtoupper(relativeDate($value['pub_date']));
+		//Узнаем лайкал ли позователь публикацию
+		$value['check_like'] = checkPressLike($connection, $user_id, $value['public_id']);
+
+
+		if($value['check_like'])
+			$value['button_like'] = "<button id='button_like' onclick='delLike(event)'><img src='/img/cyte/heart_red.png' alt=''></button>";
+		else
+			$value['button_like'] = "<button id='button_like' onclick='addLike(event)'><img src='/img/cyte/heart.png' alt=''></button>";
+
+		$sql->execute([$value['id']]);
+		$value['comment'] = $sql->fetchAll(PDO::FETCH_ASSOC);
+
+		if(count($value['comment']) > 4)
+			$value['visible_comment'] = '<button>Еще комментарии</button>';
+
+		$value['comment'] = array_slice($value['comment'], 0, 4);
+		
+		
+		if(!empty($value['comment'])){
+			$count = 0;
+			foreach ($value['comment'] as  $comment) {
+				
+
+				if(commentCheckPressLike($connection, $user_id, $comment['id']))
+					$button = "<button onclick='delLikeComment(event);'><img src='/img/cyte/heart_red.png' alt=''></button>";
+				else
+					$button = "<button onclick='addLikeComment(event);'><img src='/img/cyte/heart.png' alt=''></button>";
 	
+				$value['comment'][$count]['button_like'] = $button;
+				$count++;
+
+			}
+		}
+
+
+		$result[] = $value;
+	}
+
+	
+	return $result;
+}

@@ -1,0 +1,264 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+
+body{
+	background: url('../../img/cyte/background1.png');
+}
+
+#body_document{
+	
+	width: 100%;
+	margin-top: 50px;
+	float: left;
+
+}
+
+#center_content{
+	width: 620px;
+	margin-left: 15%;
+	padding: 10px;
+
+	float: left;
+}
+
+
+
+.publication{
+	width: 100%;
+	background: white;
+	border: 1px solid #dedede;
+	border-radius: 3px;
+	margin-bottom: 50px;
+}
+
+.header_block{
+	float: left;
+	width: 100%;
+	height: 60px;
+
+}
+
+.header_block > a > img{
+	width: 40px;
+	height: 40px;
+	margin: 10px;
+	border-radius: 50%;
+	float: left;
+}
+
+.header_block > a > p{
+	float: left;
+	margin-top: 20px;
+}
+
+
+.image_publication{
+	width: 100%;
+	float: left;
+	position: relative;
+
+}
+
+
+.image_publication > img{
+	width: 100%;
+	outline: none;
+}
+
+#background{
+	position: absolute; 
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+#heart{
+	opacity: 0.0;
+	height: 100px;
+	
+	position: absolute; 
+	top: calc(50% - 50px); 
+	left: calc(50% - 50px); 
+}
+
+.buttons_likes{
+	
+	width: 100%;
+	float: left;
+	
+	
+	display: inline-block;
+}
+
+
+
+.buttons_likes > button{
+	border: none;
+	background: none;
+	cursor: pointer;
+	outline: none;
+	margin: 5px 0 5px 10px;
+	
+}
+
+.buttons_likes > button > img{
+	width: 30px;
+
+}
+
+.count_likes{
+	margin: 0 0 0 10px;
+	
+}
+
+.article_publication{
+	margin: 5px 10px 5px 10px;
+}
+
+.list_comments > ul{
+	list-style-type: none;
+	
+	
+	width: 100%;
+}
+
+
+.list_comments > ul > li{
+	width: calc(100% - 20px);
+	display: inline-block;
+	
+	position: relative;
+	
+	
+	margin: 5px 10px 5px 10px;
+}
+
+.list_comments > ul > li > p{
+	width: 95%;
+	float: left;
+	display: inline-block;
+
+}
+
+.login{
+	font-weight: 700;
+}
+
+.article{
+	
+	
+}
+
+.list_comments > ul > li > button > img{
+	height: 14px;
+}
+
+.list_comments > ul > li > button{
+	border: none;
+	cursor: pointer;
+	background: none;
+	outline: none;
+	display: block;
+	position: absolute;
+	top: calc(50% - 7px);
+	right: 0;
+}
+
+
+
+.pub_date{
+	width: 100%;
+	
+}
+
+.pub_date > p{
+	font-size: 11px;
+	margin: 5px 10px 5px 10px;
+}
+
+.entry_field{
+	width: 100%;
+}
+
+.entry_field > input{
+	width:  calc(100% - 20px);
+	padding: 10px;
+	border: none;
+	font-size: 16px;
+	outline: none;
+}
+
+
+#right_block{
+	background: white;
+	border: 1px solid #dedede;
+	border-radius: 3px;
+	margin-top: 10px;
+	width: 280px;
+	float: left;
+	margin-left: 30px;
+
+	padding-bottom: 10px;
+}
+
+
+#right_block > #header_block{
+	
+	width: 100%;
+	height: 40px;
+}
+
+#right_block > #header_block > #title_block{
+	margin: 10px 0 0 10px;
+	float: left;
+}
+
+#right_block > #header_block > a{
+	float: right;
+	margin: 10px 10px 0 0;
+}
+
+#list_users{
+	width: 100%;
+	
+
+}
+
+#list_users > ul{
+	list-style-type: none;
+	float: left;
+}
+
+#list_users > ul > li{
+	float: left;
+	margin-bottom: 10px;
+	width: 100%;
+
+}
+
+#list_users > ul > li > img{
+	margin: 5px 5px 1px 10px;
+	border-radius: 50%;
+	width: 40px;
+	height: 40px;
+	float: left;
+}
+
+#list_users > ul > li > p{
+	float: left;
+	margin-top: 15px;
+
+}
+
+#list_users > ul > li > button{
+	float: right;
+	margin-top: 17px;
+	margin-right: 10px;
+	color: #089dd4;
+	background: none;
+	border: none;
+	cursor: pointer;
+	font-size: 12px;
+}

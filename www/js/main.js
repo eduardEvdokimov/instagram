@@ -9,10 +9,7 @@ function showForm()
 	$("body").css("overflow","hidden");
 }
 
-//Установка фокуска на элемент
-function setFocus(element){
-	$(element).focus();
-}
+
 
 
 //отслеживаем где на что кликнули, для скрытия всплывающих окон
@@ -38,3 +35,6 @@ $(document).click(function(e) {
 	$('#background_form').fadeOut(); 
 	$('#form_publications').fadeOut();
 });
+
+
+
