@@ -141,8 +141,8 @@ function subscribe(event)
 {
 
 	var data = {};
-	//Получаем id подпичика
-	data['user_login'] = $('#id_subscriber').val();
+	
+	
 	//Получаем id объекта подписки (на кого подписываются)
 	data['sub_object'] = $('#sub_object').val();
 	console.log(data['sub_object']);
@@ -165,8 +165,13 @@ function subscribe(event)
 			console.log(data);
 			if(data == true){
 				if(is_list_users){
-					$(element_li).children('#sub').removeClass('show').addClass('hidden');
-					$(element_li).children('#unsub').removeClass('hidden').addClass('show');
+					
+
+					$(element_li)
+					.children('#sub')
+					.html('Отписаться')
+					.attr({'id': 'unsub', 'onclick': 'unSubscribe(event)'});
+					
 				}else{
 					//Если ошибок по серверной части не возникло
 				//Скрываем кнопку подписки
@@ -187,8 +192,6 @@ function unSubscribe()
 {
 
 	var data = {};
-	//Получаем id подпичика
-	data['user_login'] = $('#id_subscriber').val();
 	//Получаем id объекта подписки (на кого подписываются)
 	data['sub_object'] = $('#sub_object').val();
 	
@@ -211,8 +214,11 @@ function unSubscribe()
 			if(data == true){
 
 				if(is_list_users){
-					$(element_li).children('#sub').removeClass('hidden').addClass('show');
-					$(element_li).children('#unsub').removeClass('show').addClass('hidden');
+					$(element_li)
+					.children('#unsub')
+					.html('Подписаться')
+					.attr({'id': 'sub', 'onclick': 'subscribe(event)'});
+					
 				}else{
 					//Если ошибок по серверной части не возникло
 					//Отображаем кнопку подписки

@@ -83,4 +83,10 @@ class SqlRequest{
 	public $del_update_count_subscriprions = 'UPDATE users SET count_subscriptions = count_subscriptions - 1 WHERE id=?';
 	//Увеличиваем количество публикаций на 1
 	public $add_count_publications = 'UPDATE users SET count_publications = count_publications + 1 WHERE id=?';
+	//Извлекает 12 публикаций пользователей на которых подписаны. Сортировка по дате добавления публикации
+	public $select_new_publications = 'SELECT subscribers.*, publications.*, users.login, users.avatar FROM subscribers, publications, users WHERE subscribers.id_subscriber=? AND publications.parent_id=subscribers.sub_object AND users.id=publications.parent_id ORDER BY publications.pub_date DESC LIMIT 12';
+	//Извлекает id пользователей на которых мы подписаны
+	public $select_subscribers_user = "SELECT * FROM subscribers WHERE id_subscriber=?";
+	//Извлекает 20 записей, сортирует по количеству подписчиков
+	public $select_popular_users = 'SELECT * FROM users WHERE id != ? ORDER BY count_subscribers DESC LIMIT 20';
 }

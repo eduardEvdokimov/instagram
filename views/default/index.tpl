@@ -12,7 +12,7 @@
 					<p id='user_login'>{$value.login}</p>	
 				</a>
 			</div>
-			<div class='image_publication' ondblclick="likeDoubleClick(event)" onselectstart="return false" onmousedown="return false">
+			<div class='image_publication' ondblclick="{$value.dbl_click_like}" onselectstart="return false" onmousedown="return false">
 				<img src='/img/users_publications/{$value.img}' alt=''>
 				<div id='background'>
 					<img src="/img/cyte/heart_white.png" id='heart'>
@@ -68,39 +68,23 @@
 		</div>
 		<div id='list_users'>
 			<ul>
-				<li>
-					<img src='/img/users_avatar/9b0240a440b6a3dcc314e5f8bdd8759e.jpeg' alt=''>
-					<p>Имя пользователя</p>
-					<button>Подписаться</button>
+				{foreach from=$recomendateUsers item=item}
+				<li id='{$item.login}'>
+					<a href='http://instagram/user/{$item.login}/'>
+						<img src='/img/users_avatar/{$item.avatar}' alt=''>
+						<p>{$item.login}</p>
+					</a>
+					<button class='show' onclick='subscribe(event)' id='sub'>Подписаться</button>
 				</li>
-				<li>
-					<img src='/img/users_avatar/9b0240a440b6a3dcc314e5f8bdd8759e.jpeg' alt=''>
-					<p>Имя пользователя</p>
-					<button>Подписаться</button>
-				</li>
-				<li>
-					<img src='/img/users_avatar/9b0240a440b6a3dcc314e5f8bdd8759e.jpeg' alt=''>
-					<p>Имя пользователя</p>
-					<button>Подписаться</button>
-				</li>
-				<li>
-					<img src='/img/users_avatar/9b0240a440b6a3dcc314e5f8bdd8759e.jpeg' alt=''>
-					<p>Имя пользователя</p>
-					<button>Подписаться</button>
-				</li>
-				<li>
-					<img src='/img/users_avatar/9b0240a440b6a3dcc314e5f8bdd8759e.jpeg' alt='' height="30">
-					<p>Имя пользователя</p>
-					<button>Подписаться</button>
-				</li>
-
+				{/foreach}
+				
 			</ul>
 		</div>
 	</div>
 </div>
 <script type="text/javascript" src='/js/index_page.js'></script>
-
-	{literal}
+<script type="text/javascript" src='/js/users_script.js'></script>
+{literal}
 <script>
 	$(document).ready(function(){
 		var offset = $('#right_block').offset();

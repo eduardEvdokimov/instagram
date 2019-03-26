@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>{$title}</title>
+	<title>{$user.login}</title>
 	<link href='{$TemplateWebPath}/css/main.css' rel='stylesheet'>
 	<link href='{$TemplateWebPath}/css/main_page.css' rel='stylesheet'>
 	<link rel='stylesheet' href='/fontawesome/css/all.css'>
@@ -21,8 +21,8 @@
 				<input type="submit" name="sub" value='Найти'>
 			</form>
 			<div id='userInfo'>
-				<img src='{$userAvatarPath}' alt='asdsa' height="20">
-				<a href='{$urlProfile}' id='my_login'>{$userLogin}</a>
+				<img src='{$myAvatarPath}' alt='asdsa' height="20">
+				<a href='{$myUrlProfile}' id='my_login'>{$myLogin}</a>
 			</div>
 		</div>
 	</header>

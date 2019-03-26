@@ -310,16 +310,60 @@ function registrationVK(PDO $connection, $data)
 
 }
 
-
+/*
+param connection PDO Object
+param user_id int
+Извлекает популярных 20 пользователей
+*/
 function getPopularUsers(PDO $connection, $user_id)
 {
-	$select_popular_users = 'SELECT * FROM users WHERE id != ? ORDER BY count_subscribers DESC LIMIT 20';
-
-	$sql = $connection->prepare($select_popular_users);
+	$sql = $connection->prepare($GLOBALS['SQL']->select_popular_users);
 
 	if($sql->execute([$user_id])){
 		$users = $sql->fetchAll(PDO::FETCH_ASSOC);
 		return $users;
 	}else return false;
+}
 
+
+/*
+param connection PDO Object
+param user_id int
+Излекает популярных пользователей, кроме тех на которых уже подписан пользователь user_id
+*/
+function getRecomendateUsers(PDO $connection, $user_id)
+{
+	$sql = $connection->prepare($GLOBALS['SQL']->select_subscribers_user);
+
+	if(!$sql->execute([$user_id]))
+		return false;
+
+	//Извлекаем аккаунты на которые уже подписаны
+	$data = $sql->fetchAll(PDO::FETCH_ASSOC);
+	
+	//Формируем массив из id пользователей на которых уже подписаны
+	foreach($data as $item){
+		$id_sub_user[] = $item['sub_object'];
+	}
+
+	$id_sub_user[] = $user_id; //Добавляем наш id
+
+	//Узнаем сколько в параметров в запрос нужно передать
+	for($x = 0; $x < count($id_sub_user); $x++)
+		$param_str[] = '?';
+
+	//Формируем строку для вставки в окончательный запрос
+	$param_str = implode(',', $param_str);
+
+	//Формируем окончательный запрос к БД
+	$select_recomendate_user = sprintf("SELECT * FROM users WHERE NOT id IN(%s) ORDER BY count_subscribers DESC LIMIT 5", $param_str);
+
+	$sql = $connection->prepare($select_recomendate_user);
+
+	if($sql->execute($id_sub_user)){
+		//Получаем массив с самыми популярными пользователя, кроме тех на которые уже подписаны
+		$data = $sql->fetchAll(PDO::FETCH_ASSOC);
+	}else return false;
+
+	return $data;
 }

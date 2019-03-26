@@ -1,10 +1,4 @@
 <?php 
-
-require_once '../lib/MainFunction.php';
-require_once '../lib/create_relative_date.php'; //Подключаем функцию формирования относительной даты
-require_once '../lib/sql_request.php'; //Подключаем класс со всеми SQL запросами
-
-
 /*
 param $connection PDO object
 param $user_id int
@@ -14,10 +8,22 @@ param $hashtags string
 	Добавляет публикацию в БД
 	Возвращает в случае успешного добавлния публикации true,если данные не прошли проверку на правильность возвращает массив с ошибками, если возникли проблемы со стороны сервера возвращает false
 */
+require_once '../lib/MainFunction.php';//Основные функции для работы сайта
+require_once '../lib/create_relative_date.php'; //Подключаем функцию формирования относительной даты
+require_once '../lib/sql_request.php'; //Подключаем класс со всеми SQL запросами
+
+/*
+param connection PDO object
+param user_login string
+param photo array
+param title string
+param hashtags string
+	Добавляет публикацию в БД
+*/
 function addPublication(PDO $connection, $user_login, $photo, $title, $hashtags)
 {
 	$result = array();
-
+	//Получаем данные пользователя по логину, который добавляет публикацию
 	$user = getDataUserInLogin($connection, $user_login);
 
 	//Проверка, пользователь загрузил картинку или другой файл
@@ -31,8 +37,7 @@ function addPublication(PDO $connection, $user_login, $photo, $title, $hashtags)
 	//Если не пустые очищаем данные
 	$title = !empty($title) ? trim(htmlspecialchars($title)) : null;
 	$hashtags = !empty($hashtags) ? trim(htmlspecialchars($hashtags)) : null;
-	$public_id = md5($photo['size'] . mt_rand(1, 100)) ;
-
+	$public_id = md5($photo['size'] . mt_rand(1, 100)) ;//Формируем внешний id публикации
 	$filename = $photo['tmp_name']; // Временный путь картинки на сервере
 	//Формируем путь куда будет загружена картинка. Имя картинки делаем путем хеширования временного пути
 	$upload_path = 'img/users_publications/' . md5($photo['tmp_name']) . '.' . basename($photo['type']);
@@ -62,7 +67,7 @@ function addPublication(PDO $connection, $user_login, $photo, $title, $hashtags)
 		$line_hashtags = str_replace(' ', '', $hashtags); //Удаляем все пробелы
 
 		$array = explode(',', $line_hashtags); //Формируем массив из хештегов
-
+		//Проверяем каждый хештег на валидность
 		foreach ($array as $value) {
 			//Проверяем, каждый ли хештег начинается с #
 			if(!preg_match('/^#\S+/is', $value)){
@@ -71,7 +76,6 @@ function addPublication(PDO $connection, $user_login, $photo, $title, $hashtags)
 				return $result;
 			}
 		}
-
 
 		$sql = $connection->prepare($GLOBALS['SQL']->sql_add_hashtag);
 
@@ -88,14 +92,14 @@ function addPublication(PDO $connection, $user_login, $photo, $title, $hashtags)
 		'public_id_publication' => $public_id, 
 		'image_publication' => $filename_DB
 	];
-	
+
 	return $result;
 }
 
 
 /*
 param connection Object PDO
-param user_id int 
+param login int 
 	Извлекает из БД 12 последних публикаций
 	Возвращает в случае успешного извлечения публикаций массив с публикациями, в противном случае false
 */
@@ -411,21 +415,22 @@ function delLike(PDO $connection, $user_id, $public_id)
 	return false;
 }
 
+/*
+param connection PDO object
+param user_id int
+	Возвращает новые публикации пользователей на которых подписан
+*/
 
 function getNewPublications(PDO $connection, $user_id)
 {
-	$select_new_publications = 'SELECT subscribers.*, publications.*, users.login, users.avatar FROM subscribers, publications, users WHERE subscribers.id_subscriber=? AND publications.parent_id=subscribers.sub_object AND users.id=publications.parent_id ORDER BY publications.pub_date DESC LIMIT 12';
-
-
-
-	$sql = $connection->prepare($select_new_publications);
-
+	$sql = $connection->prepare($GLOBALS['SQL']->select_new_publications);
+	//Проверка успешности работы с БД
 	if(!$sql->execute([$user_id]))
 		return false;
 
 	$publications = $sql->fetchAll(PDO::FETCH_ASSOC);
 	$sql = $connection->prepare($GLOBALS['SQL']->select_comment_pub);
-
+	//Проходим по каждой публикации
 	foreach($publications as $value){
 		//Преобразуем дату публикации в относительный вид
 		$value['pub_date'] = mb_strtoupper(relativeDate($value['pub_date']));
@@ -433,25 +438,33 @@ function getNewPublications(PDO $connection, $user_id)
 		$value['check_like'] = checkPressLike($connection, $user_id, $value['public_id']);
 
 
-		if($value['check_like'])
+		if($value['check_like']){
 			$value['button_like'] = "<button id='button_like' onclick='delLike(event)'><img src='/img/cyte/heart_red.png' alt=''></button>";
-		else
+			$value['dbl_click_like'] = 'falseLike(event)';
+		}
+		else{
 			$value['button_like'] = "<button id='button_like' onclick='addLike(event)'><img src='/img/cyte/heart.png' alt=''></button>";
 
+			$value['dbl_click_like'] = 'likeDoubleClick(event)';
+		}
+		//Извлекаем комментарии для публикации
 		$sql->execute([$value['id']]);
 		$value['comment'] = $sql->fetchAll(PDO::FETCH_ASSOC);
 
-		if(count($value['comment']) > 4)
-			$value['visible_comment'] = '<button>Еще комментарии</button>';
+		if(count($value['comment']) > 3)
+			//Если комментариев больше 3 добавляем кнопку подгрузки комментариев
+			$value['visible_comment'] = "<button id='loadComment' onclick='loadComments(event);'>Загрузить еще комментарии</button>";
 
-		$value['comment'] = array_slice($value['comment'], 0, 4);
-		
+		//Обрезаем массив с комментариями до 3
+		$value['comment'] = array_slice($value['comment'], 0, 3);
+		//Инвертируем массив
+		$value['comment'] = array_reverse($value['comment']);
 		
 		if(!empty($value['comment'])){
 			$count = 0;
+			//Проходим по каждому комментарию, чтобы узнать лайкал ли пользователь его
 			foreach ($value['comment'] as  $comment) {
 				
-
 				if(commentCheckPressLike($connection, $user_id, $comment['id']))
 					$button = "<button onclick='delLikeComment(event);'><img src='/img/cyte/heart_red.png' alt=''></button>";
 				else
@@ -459,14 +472,47 @@ function getNewPublications(PDO $connection, $user_id)
 	
 				$value['comment'][$count]['button_like'] = $button;
 				$count++;
-
 			}
 		}
-
 
 		$result[] = $value;
 	}
 
+	return $result;
+}
+
+
+/*
+param connection PDO Object
+param publication_id string
+param start int
+Извлекает комментарии из БД начиная с позиции start
+*/
+function loadComments(PDO $connection, $publication_id, int $start)
+{
+	$select_comment_in_start = "SELECT  users.login, publications.id, comments.* FROM comments, users, publications WHERE publications.public_id=? AND comments.parent_id_publication=publications.id AND users.id=comments.parent_id_user ORDER BY pub_date DESC LIMIT {$start}, 10";
+
+	if(!is_int($start))
+		return false;
+
+	$sql = $connection->prepare($select_comment_in_start);
+
+	if($sql->execute([$publication_id])){
+		$result = $sql->fetchAll(PDO::FETCH_ASSOC);
+	}else return false;
+
+
+	foreach ($result as $comment) {
+		//Определяем лайкал ли пользователь комментарий
+		if(commentCheckPressLike($connection, $_SESSION['user']['id'], $comment['id']))
+			$comment['button_like'] = "<button onclick='delLikeComment(event);'><img src='/img/cyte/heart_red.png' alt=''></button>";
+		else
+			$comment['button_like'] = "<button onclick='addLikeComment(event);'><img src='/img/cyte/heart.png' alt=''></button>";	
+
+		$data[] = $comment;
+	}
+
+	$result = $data;
 	
 	return $result;
 }

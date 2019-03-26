@@ -3,9 +3,9 @@
 	Файл загрузки главной станицы
 */
 require_once '../config/db.php'; //подключаемся к базе данных
-require_once '../lib/MainFunction.php';
-require_once '../models/UsersModel.php';
-require_once '../models/PublicationModel.php';
+require_once '../lib/MainFunction.php';//Основные функции для работы проекта
+require_once '../models/UsersModel.php';//Функции для работы с данными пользователя
+require_once '../models/PublicationModel.php';//Функции для работы с публикациями
 
 function indexAction(Smarty $smarty)
 {
@@ -15,34 +15,45 @@ function indexAction(Smarty $smarty)
 
 	$template = 'default'; // Название папки с файлами веб пространства для дефолтного шаблона
 
+	//Получаем данные пользователя из БД который вошел на сайт
 	$user_action = getDataUserInLogin($GLOBALS['connection'], $user['login']);
 	
-
 	$smarty->assign('title', 'Instagram'); 
 	$smarty->assign('TemplateWebPath', $template);
-	$smarty->assign('userLogin', $user['login']);
-	$smarty->assign('userAvatarPath', $userAvatarPath);
+	$smarty->assign('myLogin', $user['login']);
+	$smarty->assign('myAvatarPath', $userAvatarPath);
+	$smarty->assign('myUrlProfile', $userProfileUrl); 
 
-	$smarty->assign('urlProfile', $userProfileUrl);
-
+	//Проверяем есть ли у пользователя подписки
 	if($user_action['count_subscriptions'] <= 0){
+		//Если их нет, извлекаем из БД самых популярных
 		$users_subscribe = getPopularUsers($GLOBALS['connection'], $user_action['id']);
-
+		//Проверяем упешность работы с БД
 		if(!$users_subscribe)
 			exit('Ошибка. Попробуйте позже');
-
+		//Формируем переменную-массив с популярмыми пользователями
 		$smarty->assign('users', $users_subscribe);
-		$smarty->assign('user_id', $user['id']);
-
+		//Подгружаем страницу со списком популярных пользователей
 		loadTemplate($smarty, 'header');
 		loadTemplate($smarty, 'list_add_subscribers');
 		exit();
 	}
 
+	//Получаем последние публикации пользователей на которых подписаны
 	$publications = getNewPublications($GLOBALS['connection'], $user['id']);
+	//Получаем самых популярных пользователей на которых еще не подписаны
+	$recomendateUsers = getRecomendateUsers($GLOBALS['connection'], $user['id']);
 
 	$smarty->assign('publications', $publications);
+	$smarty->assign('recomendateUsers', $recomendateUsers);
 	loadTemplate($smarty, 'header');
 	loadTemplate($smarty, 'index');
 	loadTemplate($smarty, 'footer');
+}
+
+
+//Подгрузка комментариев
+function loadCommentsAction()
+{
+	echo json_encode(loadComments($GLOBALS['connection'], $_POST['publication_id'], $_POST['start']));
 }

@@ -3,18 +3,17 @@ function addComment(event)
 {
 	//Проверяем нажал ли пользователь на enter
 	if(event.keyCode == 13){
-	
 		var publication = $(event.target).closest('.publication');
-		
 		var comment = $(event.target).val(); //Получаем значение инпута (комментарий)
 		//Ищем родителя object с классом visible_big_publication и извлекаем его id
 		var id_publication = publication.attr('id');	
-	
+		var data = new FormData();
+
 		if(comment){
 			//Если инпут не пустой проверяем на пробелы
 			if(comment.search(/^\s+$/) == 0){
 				//Если ничего не введено, а есть пробелы
-				//Меняем подсказка у инпута
+				//Меняем подсказку у инпута
 				publication.find('#addComment').prop('placeholder', 'Введите что-нибудь');
 				//Добавляем класс инпуту, красящий подсказку в красный
 				publication.find('#addComment').addClass('comment_error');
@@ -24,11 +23,8 @@ function addComment(event)
 			}
 		}else return;
 
-				
-		var data = new FormData();
 		data.append('comment', comment);
 		data.append('public_id', id_publication);
-
 
 		$.ajax({
 			type: 'post',
@@ -46,17 +42,12 @@ function addComment(event)
 					content += "<span class='article'>&nbsp;" + comment + '</span></p>';
 					content += "<button onclick='addLikeComment(event);'><img src='/img/cyte/heart.png' alt=''></button></li>";
 					//Вставляем в начало блока list_comments переменную
-					publication.find('.list_comments > ul').prepend(content);
-
-				
-
+					publication.find('.list_comments > ul').append(content);
 				}else{
 					alert('Не удалось добавить комментарий. Попробуйте позже.');
 				}
-
 				//Переводим инпут ввода комментария в значение по умолчанию
 				publication.find('#addComment').val('').removeClass('comment_error').prop('placeholder', 'Добавьте комментарий...');
-
 			},
 			error: function(){
 				alert('Не удалось добавить комментарий. Попробуйте позже.');
@@ -66,23 +57,25 @@ function addComment(event)
 }
 
 function falseLike(event){
+	//Получаем JQuery объект публикации на которыую кликнули
 	var publication = $(event.target).closest('.publication');
 
 	publication.find('#background > img').animate({height: 100, opacity: 1.0}, 200);
 	publication.find('#background > img').animate({height: 90, opacity: 1.0}, 100);
-
+	//Воспроизводим анимацию затухания спустя 1 секунду
 	setTimeout(function(){
 		publication.find('#background > img').animate({height: 50, opacity: 0.0}, 200);
 	}, 1000);
 }
 
+//Ставит лайк публикации по двойному клику
 function likeDoubleClick(event)
 {
 	var publication = $(event.target).closest('.publication');
 	var publication_id = publication.attr('id');
 	console.log(publication);
-
 	var data = new FormData();
+
 	data.append('publication_id', publication_id);
 
 	$.ajax({
@@ -122,8 +115,8 @@ function addLike(event)
 	var publication = $(event.target).closest('.publication');
 	var publication_id = publication.attr('id');
 	console.log(publication);
-
 	var data = new FormData();
+
 	data.append('publication_id', publication_id);
 
 	$.ajax({
@@ -141,7 +134,7 @@ function addLike(event)
 				//Увеличиваем количество лайков на 1
 				publication.find('#likes').html(Number(publication.find('#likes').html()) + 1);
 
-				
+				publication.find('.image_publication').attr('ondblclick', 'falseLike(event)');
 			
 		},
 		error: function(){
@@ -150,14 +143,13 @@ function addLike(event)
 	});
 }
 
+//Удаляет лайк из публикации
 function delLike(event)
 {
 	var publication = $(event.target).closest('.publication');
 	var publication_id = publication.attr('id');
-
-
-
 	var data = new FormData();
+
 	data.append('publication_id', publication_id);
 
 	$.ajax({
@@ -167,8 +159,6 @@ function delLike(event)
 		processData: false,
 		contentType: false,
 		success: function(data){
-
-			
 				//Меняем картинку на не закрашенное сердце
 				publication.find('#button_like > img').attr('src', '/img/cyte/heart.png');
 				//Меняем значение onclick на функцию добавления лайка
@@ -176,8 +166,7 @@ function delLike(event)
 				//Уменьшаем количество лайков на 1
 				publication.find('#likes').html(Number(publication.find('#likes').html()) - 1);
 
-				
-			
+				publication.find('.image_publication').attr('ondblclick', 'likeDoubleClick(event)');
 		},
 		error: function(){
 			alert('Произошла ошибка. Попробуйте позже.');
@@ -185,15 +174,15 @@ function delLike(event)
 	});
 }
 
-
+//Добавляет лайк комментарию
 function addLikeComment(event)
 {
-
 	var elemet_li = $(event.target).closest('li');
 	var comment_id = $(elemet_li).attr('id');
-	
 	var data = new FormData();
+
 	data.append('comment_id', comment_id);
+
 	$.ajax({
 		type: 'post',
 		url: 'http://instagram/publication/addLikeComment/',
@@ -221,14 +210,15 @@ function addLikeComment(event)
 function setFocus(event){
 	$(event.target).closest('.publication').find('#addComment').focus();
 }
-
+//Удаляет лайк комментария
 function delLikeComment(event)
 {
 	var elemet_li = event.target.closest('li');
 	var comment_id = $(elemet_li).attr('id');
-	
 	var data = new FormData();
+
 	data.append('comment_id', comment_id);
+
 	$.ajax({
 		type: 'post',
 		url: 'http://instagram/publication/delLikeComment/',
@@ -248,6 +238,46 @@ function delLikeComment(event)
 		},
 		error: function(){
 			alert('Произошла ошибка сервера. Попробуйте позже.');
+		}
+	});
+}
+
+//Подгрузка комментариев
+function loadComments(event){
+	var publication = $(event.target).closest('.publication');
+	var count_comment = publication.find('li').length;
+	var publication_id = publication.attr('id');
+	var data = new FormData();
+
+	data.append('start', count_comment);
+	data.append('publication_id', publication_id);
+
+	$.ajax({
+		type: 'post',
+		url: 'http://instagram/index/loadComments/',
+		data: data,
+		processData: false,
+		contentType: false,
+		dataType: 'json',
+		success: function(data){
+			console.log(data);
+			//Проверяем сколько пришло комментариев от сервера
+			if(data.length < 10){
+				//Если меньше 10, прячем кнопку подгрузки комментариев
+				publication.find('#loadComment').remove();
+			}	
+			//Добавляем комментарии в hmtl страницу
+			$.each(data, function(index, item){
+				var comment = "<li id='" + item['id'] + "'>";
+				comment += "<p><a href='http://instagram/user/" + item['login'] + "/'>";
+				comment += "<span class='login'>" + item['login'] + "</span></a>";
+				comment += "<span class='article'>&nbsp;" + item['comment'] + "</span></p>";
+				comment += item['button_like'];
+				publication.find('.list_comments > ul').prepend(comment);
+			});
+		},
+		error: function(){
+			alert('Произошла ошибка. Попробуйте позже.');
 		}
 	});
 }

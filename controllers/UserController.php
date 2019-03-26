@@ -53,23 +53,19 @@ function indexAction(Smarty $smarty)
 
 	$smarty->assign('publications', $publications);
 	
-	$smarty->assign('userLogin', $user['login']);
-	$smarty->assign('userAvatarPath', $userAvatarPath);
-
-	$smarty->assign('count_publications', $user_action['count_publications']);
-	$smarty->assign('count_subscribers', $user_action['count_subscribers']);
-	$smarty->assign('count_subscriptions', $user_action['count_subscriptions']);
+	$smarty->assign('myLogin', $user['login']);
+	$smarty->assign('myAvatarPath', $userAvatarPath);
 
 	$smarty->assign('buttonSub', $buttonSub);
 	$smarty->assign('buttonUnSub', $buttonUnSub);
 
-	$smarty->assign('title', $user['login']); 
+	
 	$smarty->assign('TemplateWebPath', $template);	
 
-	$smarty->assign('id_subscriber', $user['id']);
 	$smarty->assign('sub_object', $user_action['login']);
+	$smarty->assign('user', $user_action);
 
-	$smarty->assign('urlProfile', $userProfileUrl);
+	$smarty->assign('myUrlProfile', $userProfileUrl);
 
 	loadTemplate($smarty, 'header');
 	loadTemplate($smarty, 'user_page');
@@ -79,12 +75,12 @@ function indexAction(Smarty $smarty)
 //Подписка на пользователя
 function subscribeAction()
 {
-	echo addSubscribe($GLOBALS['connection'], $_POST['user_login'], $_POST['sub_object']);
+	echo addSubscribe($GLOBALS['connection'], $_SESSION['user']['id'], $_POST['sub_object']);
 }
 
 
 //Отписка от пользователя
 function unSubscribeAction()
 {	
-	echo deletSubscribe($GLOBALS['connection'], $_POST['user_login'], $_POST['sub_object']);
+	echo deletSubscribe($GLOBALS['connection'], $_SESSION['user']['id'], $_POST['sub_object']);
 }

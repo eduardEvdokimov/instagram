@@ -76,22 +76,17 @@ body{
 }
 #heart{
 	opacity: 0.0;
-	height: 100px;
-	
+	height: 50px;
 	position: absolute; 
 	top: calc(50% - 50px); 
 	left: calc(50% - 50px); 
 }
 
 .buttons_likes{
-	
 	width: 100%;
 	float: left;
-	
-	
 	display: inline-block;
 }
-
 
 
 .buttons_likes > button{
@@ -229,16 +224,17 @@ body{
 #list_users > ul{
 	list-style-type: none;
 	float: left;
+	width: 100%;
 }
 
 #list_users > ul > li{
 	float: left;
 	margin-bottom: 10px;
 	width: 100%;
-
+	
 }
 
-#list_users > ul > li > img{
+#list_users > ul > li > a > img{
 	margin: 5px 5px 1px 10px;
 	border-radius: 50%;
 	width: 40px;
@@ -246,7 +242,7 @@ body{
 	float: left;
 }
 
-#list_users > ul > li > p{
+#list_users > ul > li > a > p{
 	float: left;
 	margin-top: 15px;
 
