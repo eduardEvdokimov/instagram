@@ -10,9 +10,9 @@
 				{$buttonUnSub}
 				{$dropDownList}
 			</div>
-			<p class='count_info'><span class='number'>{$user.count_publications}</span>&nbsp;публикаций</p>
-			<p class='count_info'><span class='number'>{$user.count_subscribers}</span>&nbsp;подписчиков</p>
-			<p class='count_info'><span class='number'>{$user.count_subscriptions}</span>&nbsp;подписок</p>
+			<p class='count_info' style="cursor: text"><span class='number'>{$user.count_publications}</span>&nbsp;публикаций</p>
+			<p class='count_info' onclick='showWindowListUsers(event);'><span class='number'>{$user.count_subscribers}</span>&nbsp;подписчиков</p>
+			<p class='count_info' onclick='showWindowListUsers(event);'><span class='number'>{$user.count_subscriptions}</span>&nbsp;подписок</p>
 		</div>
 		<div id='about_block'>
 			<p>{$user.name}</p>
@@ -24,9 +24,73 @@
 </div>
 
 
-
-
-
+<div id='bg_popup_window' >
+	<div id='popup_window_user_list'>
+		<div id='head'>
+			<h2>Подписчики</h2>
+		</div>
+		<div id='list_users'>
+			<ul>
+				<li>
+					<img src='/img/users_avatar/5385bd4228a99b3647537793bf5f584b.jpg' alt=''>
+					<div>
+						<p id='login'>kosmas</p>
+						<p id='name'>Эдуард Евдокимов</p>
+					</div>
+					<p id='btn'>Подписаться</p>
+				</li>
+				<li>
+					<img src='/img/users_avatar/5385bd4228a99b3647537793bf5f584b.jpg' alt=''>
+					<div>
+						<p id='login'>kosmas</p>
+						<p id='name'>Эдуард Евдокимов</p>
+					</div>
+					<p id='btn'>Подписаться</p>
+				</li>
+				<li>
+					<img src='/img/users_avatar/5385bd4228a99b3647537793bf5f584b.jpg' alt=''>
+					<div>
+						<p id='login'>kosmas</p>
+						<p id='name'>Эдуард Евдокимов</p>
+					</div>
+					<p id='btn'>Подписаться</p>
+				</li>
+				<li>
+					<img src='/img/users_avatar/5385bd4228a99b3647537793bf5f584b.jpg' alt=''>
+					<div>
+						<p id='login'>kosmas</p>
+						<p id='name'>Эдуард Евдокимов</p>
+					</div>
+					<p id='btn'>Подписаться</p>
+				</li>
+				<li>
+					<img src='/img/users_avatar/5385bd4228a99b3647537793bf5f584b.jpg' alt=''>
+					<div>
+						<p id='login'>kosmas</p>
+						<p id='name'>Эдуард Евдокимов</p>
+					</div>
+					<p id='btn'>Подписаться</p>
+				</li>
+				<li>
+					<img src='/img/users_avatar/5385bd4228a99b3647537793bf5f584b.jpg' alt=''>
+					<div>
+						<p id='login'>kosmas</p>
+						<p id='name'>Эдуард Евдокимов</p>
+					</div>
+					<p id='btn'>Подписаться</p>
+				</li>
+				<li>
+					<img src='/img/users_avatar/5385bd4228a99b3647537793bf5f584b.jpg' alt=''>
+					<div>
+						<p id='login'>kosmas</p>
+						<p id='name'>Эдуард Евдокимов</p>
+					</div>
+					<p id='btn'>Подписаться</p>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>
 
 
 
@@ -73,8 +137,10 @@
 		<img src='' alt='' id='photo_publication'>
 		<div id='right_block_pub'>
 			<div id='head_window'>
-				<img src='' alt='' id='user_avatar'>
-				<p id='user_login'></p>
+				<a href='#'>
+					<img src='' alt='' id='user_avatar'>
+					<p id='user_login'></p>
+				</a>
 			</div>
 			<p id='article_publication'></p>
 		

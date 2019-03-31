@@ -235,3 +235,10 @@ function unSubscribe()
 		}
 	});
 }
+
+
+function showWindowListUsers(event)
+{
+	$('html').css('overflow', 'hidden');
+	$('#bg_popup_window').removeClass('hidden');
+}

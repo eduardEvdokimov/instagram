@@ -145,8 +145,9 @@ function showBigPublication(event){
 			$('.visible_big_publication').attr('id', id_publication);
 			//Отображение картинки
 			$('#photo_publication').attr('src', '/img/users_publications/' + data['img']);
+			$('#right_block_pub > #head_window > a').attr('href', 'http://instagram/user/' + data['author']['login'] + '/');
 			//Добавляем путь для отбражения аватарки автора публикации
-			$('#right_block_pub > #head_window > #user_avatar').attr('src', '/img/users_avatar/' + data['author']['avatar']);
+			$('#right_block_pub > #head_window > a > #user_avatar').attr('src', '/img/users_avatar/' + data['author']['avatar']);
 			//Отображаем логин, автора публикации
 			$('#user_login').html(data['author']['login']);
 			//Отображаем описание публикации

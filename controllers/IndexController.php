@@ -6,6 +6,7 @@ require_once '../config/db.php'; //подключаемся к базе данн
 require_once '../lib/MainFunction.php';//Основные функции для работы проекта
 require_once '../models/UsersModel.php';//Функции для работы с данными пользователя
 require_once '../models/PublicationModel.php';//Функции для работы с публикациями
+require_once '../models/NotificationModel.php';
 
 function indexAction(Smarty $smarty)
 {
@@ -39,10 +40,20 @@ function indexAction(Smarty $smarty)
 		exit();
 	}
 
+	$count_notification = getCountNotification($GLOBALS['connection'], $user['id']);
+
+	$html_count_notification = '<span>' . $count_notification . '</span>';
+
+	if($count_notification > 0)
+		$smarty->assign('count_notification',  $html_count_notification);
+
+	
+
 	//Получаем последние публикации пользователей на которых подписаны
 	$publications = getNewPublications($GLOBALS['connection'], $user['id']);
 	//Получаем самых популярных пользователей на которых еще не подписаны
 	$recomendateUsers = getRecomendateUsers($GLOBALS['connection'], $user['id']);
+
 
 	$smarty->assign('publications', $publications);
 	$smarty->assign('recomendateUsers', $recomendateUsers);
@@ -56,4 +67,10 @@ function indexAction(Smarty $smarty)
 function loadCommentsAction()
 {
 	echo json_encode(loadComments($GLOBALS['connection'], $_POST['publication_id'], $_POST['start']));
+}
+
+
+function loadPublicationsAction()
+{
+	echo json_encode(loadingNewPublication($GLOBALS['connection'], $_SESSION['user']['id'], $_POST['count_pub']));
 }

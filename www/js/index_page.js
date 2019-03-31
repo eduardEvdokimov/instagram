@@ -1,4 +1,4 @@
-//Добавление комментария публикации
+background_form//Добавление комментария публикации
 function addComment(event)
 {
 	//Проверяем нажал ли пользователь на enter
@@ -281,3 +281,77 @@ function loadComments(event){
 		}
 	});
 }
+
+
+
+$(document).ready(function(){
+	
+	var inProgress = false; //Отслеживает запущен ли запрос к серверу
+
+	var count_pub = 12; //Начальное количество показанных новостей
+	
+	$(window).scroll(function(){
+		if(($(window).scrollTop() + $(window).height() >= $(document).height() - 50) && !inProgress){
+
+			
+			
+			$.ajax({
+				type: 'post',
+				url: 'http://instagram/index/loadPublications/',
+				dataType: 'json',
+				data: {'count_pub': count_pub},
+				beforeSend: function(){
+					inProgress = true;
+				},
+				success: function(data){
+					console.log(data);
+					
+					if(data.length > 0){
+						$.each(data, function(index, data){
+
+							var content = "<div class='publication' id='" + data.public_id + "'><div class='header_block'>";
+							content += "<a href='http://instagram/user/" + data.login + "/'>";
+							content += "<img src='/img/users_avatar/" + data.avatar + "' alt=''>";
+							content += "<p id='user_login'>" + data.login + "</p></a></div>";
+							content += "<div class='image_publication' ondblclick=" + data.dbl_click_like + " onselectstart='return false' onmousedown='return false'>";
+							content += "<img src='/img/users_publications/" + data.img + "' alt=''><div id='background'>";
+							content += "<img src='/img/cyte/heart_white.png' id='heart'></div></div>";
+							content += "<div class='buttons_likes'>" + data.button_like;
+							content += "<button onclick='setFocus(event)'><img src='/img/cyte/comment.png' alt=''></button>";
+							content += "<p class='count_likes'><span id='likes'>" + data.likes + "</span><span> отметок 'Нравится'</span></p>";
+							data.visible_comment = (data.visible_comment == undefined) ? '' : data.visible_comment;
+							data.title = (data.title == undefined) ? '' : data.title;
+							content += "<p class='article_publication'>" + data.title + "</p>" + data.visible_comment;
+
+							
+							content += "</div><div class='list_comments'><ul>";
+
+							if(data.comment.length > 0)
+							for(var i = 0; i < data.comment.length; i++){
+								content += "<li id='" + data.comment[i].id + "'><p>";
+								content += "<a href='http://instagram/user/" + data.comment[i].login + "/'>";
+								content += "<span class='login'>" + data.comment[i].login + "</span></a>";
+								content += "<span class='article'>&nbsp;" + data.comment[i].comment + "</span></p>" + data.comment[i].button_like + "</li>";
+
+							}
+				
+	
+							content += "</ul></div><div class='pub_date'>";
+							content += "<p>" + data.pub_date + "</p></div><div class='entry_field'>";
+							content += "<input type='text' id='addComment' onkeypress='addComment(event)' placeholder='Добавьте комментарий...'></div></div>";
+
+							$('#center_content').append(content);
+					});
+						count_pub += 12;
+					}
+				},
+				error: function(){
+					alert('Не удалось извлечь из базы данных остальные публикации.');
+				},
+				complete: function(){
+					inProgress = false;
+				}
+			});
+		}
+	});
+});

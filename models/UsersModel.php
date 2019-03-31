@@ -192,6 +192,20 @@ function addSubscribe($connection, $user_id, $login_subscribe)
 		$sql = $connection->prepare($GLOBALS['SQL']->add_update_count_subscriprions);
 		$sql->execute([$user_id]);
 
+		if($user_id != $user['id']){
+			$action_add_subscribe = 'INSERT INTO action_users (action_user, action, object) VALUES(?,?,?)';
+
+			$sql = $connection->prepare($action_add_subscribe);
+
+			$sql->execute([$user_id, 'subscribe_user', $user['id']]);
+		}
+		
+
+
+
+
+
+
 		return true;
 	}
 	else{
@@ -214,6 +228,13 @@ function deletSubscribe(PDO $connection, $user_id, $login_subscribe)
 		
 		$sql = $connection->prepare($GLOBALS['SQL']->del_update_count_subscriprions);
 		$sql->execute([$user_id]);
+
+
+		$action_del_subscribe = "DELETE FROM action_users WHERE action_user=? AND action='subscribe_user' AND object=?";
+
+		$sql = $connection->prepare($action_del_subscribe);
+
+		$sql->execute([$user_id, $user['id']]);
 
 		return true;
 	}

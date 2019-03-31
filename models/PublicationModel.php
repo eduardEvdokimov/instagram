@@ -263,6 +263,24 @@ function addComment(PDO $connection, $id_user, $public_id, $comment)
 
 	if($sql->execute([$id_user, $id_publication, $comment])){
 		$id_comment = $connection->lastInsertId();
+
+
+		$sql = $connection->prepare($GLOBALS['SQL']->sql_get_last_Insert_user);
+
+		$sql->execute([$data['parent_id']]);
+
+		$user = $sql->fetch(PDO::FETCH_ASSOC);
+		
+		if($id_user != $user['id']){
+			$add_action_comment = 'INSERT INTO action_users (action_user, action, object, more) VALUES (?,?,?,?)';
+
+			$sql = $connection->prepare($add_action_comment);
+
+			$sql->execute([$id_user, 'add_comment', $user['id'], $id_comment]);
+		}
+			
+
+
 		return $id_comment;
 	}else return false;
 	
@@ -326,8 +344,29 @@ function delLikeComment(PDO $connection, $user_id, $comment_id)
 	if($sql->execute([$user_id, $comment_id])){
 		$sql = $connection->prepare($GLOBALS['SQL']->decrement_like_comment);
 
-		if($sql->execute([$comment_id]))
+		if($sql->execute([$comment_id])){
+
+			$select_user_from_comment_id = 'SELECT users.id, comments.parent_id_user FROM users, comments WHERE comments.id=? AND users.id=comments.parent_id_user';
+
+			$sql = $connection->prepare($select_user_from_comment_id);
+
+			$sql->execute([$comment_id]);
+
+			$user = $sql->fetch(PDO::FETCH_ASSOC);
+
+			if($user_id != $user['id']){
+
+				$action_del_like_comment = "DELETE FROM action_users WHERE action_user=? AND action='like_comment' AND more=?";
+
+				$sql = $connection->prepare($action_del_like_comment);
+
+				$sql->execute([$user_id, $comment_id]);
+			}
+
+
+
 			return true;
+		}
 		else
 			return false;
 
@@ -350,8 +389,28 @@ function addLikeComment(PDO $connection, $user_id, $comment_id)
 	if($sql->execute([$user_id, $comment_id])){
 		$sql = $connection->prepare($GLOBALS['SQL']->increment_like_comment);
 
-		if($sql->execute([$comment_id]))
+		if($sql->execute([$comment_id])){
+
+			$select_user_from_comment_id = 'SELECT users.id, comments.parent_id_user FROM users, comments WHERE comments.id=? AND users.id=comments.parent_id_user';
+
+			$sql = $connection->prepare($select_user_from_comment_id);
+
+			$sql->execute([$comment_id]);
+
+			$user = $sql->fetch(PDO::FETCH_ASSOC);
+
+			if($user_id != $user['id']){
+
+				$action_add_like_comment = 'INSERT INTO action_users (action_user, action, object, more) VALUES (?,?,?,?)';
+
+				$sql = $connection->prepare($action_add_like_comment);
+
+				$sql->execute([$user_id, 'like_comment', $user['id'], $comment_id]);
+			}
+
+
 			return true;
+		}
 		else
 			return false;
 
@@ -380,6 +439,25 @@ function addLike(PDO $connection, $user_id, $public_id)
 	if($sql->execute([$user_id, $pub_id])){
 		$sql = $connection->prepare($GLOBALS['SQL']->increment_like);
 		if($sql->execute([$pub_id])){
+
+			$select_user_from_public_id_pub = 'SELECT id, parent_id FROM publications WHERE public_id=?';
+
+			$sql = $connection->prepare($select_user_from_public_id_pub);
+
+			$sql->execute([$public_id]);
+
+			$publication = $sql->fetch(PDO::FETCH_ASSOC);
+
+			if($user_id != $publication['parent_id']){
+
+				$action_add_like_publication = 'INSERT INTO action_users (action_user, action, object, more) VALUES (?,?,?,?)';
+
+				$sql = $connection->prepare($action_add_like_publication);
+
+				$sql->execute([$user_id, 'like_publication', $publication['parent_id'], $publication['id']]);
+			}
+
+
 			return true;
 		}
 	}
@@ -408,6 +486,25 @@ function delLike(PDO $connection, $user_id, $public_id)
 	if($sql->execute([$user_id, $pub_id])){
 		$sql = $connection->prepare($GLOBALS['SQL']->decrement_likes);
 		if($sql->execute([$pub_id])){
+
+			$select_user_from_public_id_pub = 'SELECT id, parent_id FROM publications WHERE public_id=?';
+
+			$sql = $connection->prepare($select_user_from_public_id_pub);
+
+			$sql->execute([$public_id]);
+
+			$publication = $sql->fetch(PDO::FETCH_ASSOC);
+
+			if($user_id != $publication['parent_id']){
+
+				$action_del_like_publication = "DELETE FROM action_users WHERE action_user=? AND action='like_publication' AND more=?";
+
+				$sql = $connection->prepare($action_del_like_publication);
+
+				$sql->execute([$user_id, $publication['id']]);
+			}
+
+
 			return true;
 		}
 	}
@@ -423,6 +520,7 @@ param user_id int
 
 function getNewPublications(PDO $connection, $user_id)
 {
+
 	$sql = $connection->prepare($GLOBALS['SQL']->select_new_publications);
 	//Проверка успешности работы с БД
 	if(!$sql->execute([$user_id]))
@@ -483,6 +581,80 @@ function getNewPublications(PDO $connection, $user_id)
 
 
 /*
+param connection Object PDO
+param user_login string
+param count_pub int 
+	Извлекает 12 записей начиная с опреденной позиции. 
+	Служит для ассинхронной подгрузки публикаций на страницу. 
+	Возвращает в случае успешного извлечения публикаций массив с ними, в противном случае false
+*/
+function loadingNewPublication(PDO $connection, $user_id, $count_pub)
+{
+	//Извлечение 12 последнедобавленных публикаций начиная с определенного места
+	$load_new_pub = "SELECT subscribers.*, publications.*, users.login, users.avatar FROM subscribers, publications, users WHERE subscribers.id_subscriber=? AND publications.parent_id=subscribers.sub_object AND users.id=publications.parent_id ORDER BY publications.pub_date DESC LIMIT {$count_pub}, 12";
+
+	$sql = $connection->prepare($load_new_pub);
+	if(!$sql->execute([$user_id]))
+		return false;
+
+	$publications = $sql->fetchAll(PDO::FETCH_ASSOC);
+
+	$sql = $connection->prepare($GLOBALS['SQL']->select_comment_pub);
+	if(!empty($publications))
+	//Проходим по каждой публикации
+	foreach($publications as $value){
+		//Преобразуем дату публикации в относительный вид
+		$value['pub_date'] = mb_strtoupper(relativeDate($value['pub_date']));
+		//Узнаем лайкал ли позователь публикацию
+		$value['check_like'] = checkPressLike($connection, $user_id, $value['public_id']);
+
+
+		if($value['check_like']){
+			$value['button_like'] = "<button id='button_like' onclick='delLike(event)'><img src='/img/cyte/heart_red.png' alt=''></button>";
+			$value['dbl_click_like'] = 'falseLike(event)';
+		}
+		else{
+			$value['button_like'] = "<button id='button_like' onclick='addLike(event)'><img src='/img/cyte/heart.png' alt=''></button>";
+
+			$value['dbl_click_like'] = 'likeDoubleClick(event)';
+		}
+		//Извлекаем комментарии для публикации
+		$sql->execute([$value['id']]);
+		$value['comment'] = $sql->fetchAll(PDO::FETCH_ASSOC);
+
+		if(count($value['comment']) > 3)
+			//Если комментариев больше 3 добавляем кнопку подгрузки комментариев
+			$value['visible_comment'] = "<button id='loadComment' onclick='loadComments(event);'>Загрузить еще комментарии</button>";
+
+		//Обрезаем массив с комментариями до 3
+		$value['comment'] = array_slice($value['comment'], 0, 3);
+		//Инвертируем массив
+		$value['comment'] = array_reverse($value['comment']);
+		
+		if(!empty($value['comment'])){
+			$count = 0;
+			//Проходим по каждому комментарию, чтобы узнать лайкал ли пользователь его
+			foreach ($value['comment'] as  $comment) {
+				
+				if(commentCheckPressLike($connection, $user_id, $comment['id']))
+					$button = "<button onclick='delLikeComment(event);'><img src='/img/cyte/heart_red.png' alt=''></button>";
+				else
+					$button = "<button onclick='addLikeComment(event);'><img src='/img/cyte/heart.png' alt=''></button>";
+	
+				$value['comment'][$count]['button_like'] = $button;
+				$count++;
+			}
+		}
+
+		$result[] = $value;
+	}
+	return $result;
+}
+
+
+
+
+/*
 param connection PDO Object
 param publication_id string
 param start int
@@ -514,5 +686,117 @@ function loadComments(PDO $connection, $publication_id, int $start)
 
 	$result = $data;
 	
+	return $result;
+}
+
+
+function searchRequest(PDO $connection, $search)
+{
+
+	$search_users = "SELECT * FROM users WHERE login LIKE  ? OR name LIKE ?";
+	$search_hashtags = "SELECT * FROM hashtags WHERE hashtag LIKE ?";
+
+	$sql = $connection->prepare($search_users);
+
+	$search = str_replace('#', '', $search);
+
+	if(!$sql->execute(['%' . $search . '%','%' . $search . '%']))
+		return faslse;
+
+	$result = $sql->fetchAll(PDO::FETCH_ASSOC);
+
+	if(count($result) > 0)
+	foreach ($result as $value) {
+
+		if($value['name'] == null){
+			
+
+			$item = "<a href='http://instagram/user/{$value['login']}/'><li><img src='/img/users_avatar/{$value['avatar']}' alt=''><div>";
+			$item .= "<p class='login'>{$value['login']}</p></div></li></a>";
+		}else{
+
+			$item = "<a href='http://instagram/user/{$value['login']}/'><li><img src='/img/users_avatar/{$value['avatar']}' alt=''><div>";
+			$item .= "<p class='login'>{$value['login']}</p>";
+			$item .= "<p class='name'>{$value['name']}</p></div></li></a>";
+		}
+
+		$r[] = $item;
+	}
+
+		
+	$sql = $connection->prepare($search_hashtags);
+
+
+	if(!$sql->execute(['%#' . $search . '%']))
+		return false;
+
+	$hashtags = $sql->fetchAll(PDO::FETCH_ASSOC);
+
+	if(!empty($hashtags)){
+
+		$count_pub_in_hashtag = count($hashtags);
+		
+	
+		$pattern = sprintf("/(#%s[^,]*)/su", $search);
+	
+		preg_match($pattern, $hashtags[0]['hashtag'], $m);
+		$filter_hashtag = $m[1];
+		$url_hashtag = str_replace(['#', 'х'], ['', ']}]'], $filter_hashtag);
+
+
+
+
+		$item = "<a href='http://instagram/search/{$url_hashtag}/'><li><img src='/img/cyte/hashtag.jpeg' alt=''><div>";
+		$item .= "<p class='login'>{$filter_hashtag}</p>";
+		$item .= "<p class='name'><span>{$count_pub_in_hashtag}</span> публикаций</p></div></li></a>";
+		$r[] = $item;
+			
+	}
+
+	return $r;
+}
+ 
+
+function getPublicationInHashtag(PDO $connection, $hashtag)
+{
+	$select_publication_in_hashtag = "SELECT parent_id_publication FROM hashtags WHERE hashtag LIKE ?";
+
+	$sql = $connection->prepare($select_publication_in_hashtag);
+
+	$hashtag_sql = '%' . $hashtag . '%';
+
+	if(!$sql->execute([$hashtag_sql]))
+		return false;
+
+	$data = $sql->fetchAll(PDO::FETCH_ASSOC);
+	foreach ($data as  $value) {
+		$dat[] = $value['parent_id_publication'];
+	}
+	$count_publication = count($data);
+
+	$sql_param =  implode(',', explode(' ', trim(str_repeat('? ', $count_publication))));
+	
+	$select_publication = "SELECT * FROM publications WHERE id IN($sql_param)";
+
+	$sql = $connection->prepare($select_publication);
+
+
+	if(!$sql->execute($dat))
+		return false;
+
+	$d = $sql->fetchAll(PDO::FETCH_ASSOC);
+
+	$sql = $connection->prepare($GLOBALS['SQL']->select_count_comment);
+
+		if(count($d) > 0){
+			//Если есть публикации, проходим по каждой и извлекаем количество комментариев
+			foreach ($d as $value) {
+				$sql->execute([$value['id']]);
+				$count_comment = $sql->fetch(PDO::FETCH_ASSOC);
+				$value['comment'] = $count_comment['COUNT(*)'];
+				$result[] = $value;
+			}
+		}
+
 	return $result;
 }

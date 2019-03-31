@@ -89,4 +89,12 @@ class SqlRequest{
 	public $select_subscribers_user = "SELECT * FROM subscribers WHERE id_subscriber=?";
 	//Извлекает 20 записей, сортирует по количеству подписчиков
 	public $select_popular_users = 'SELECT * FROM users WHERE id != ? ORDER BY count_subscribers DESC LIMIT 20';
+	//Извлекает количество не прочитанных уведомлений пользователя
+	public $select_count_nocheck_notif = "SELECT COUNT(*) FROM action_users WHERE object=? AND checked!=1";
+	//Извлекает все оповещения пользователя
+	public $select_notification_user = "SELECT * FROM action_users WHERE object=? ORDER BY action_date DESC";
+	//Обновляет значение просмотра уведомления
+	public $update_checked = 'UPDATE action_users SET checked=1 WHERE id=?';
+	//Получает данные комментария по id
+	public $select_comment_in_id = "SELECT * FROM comments WHERE id=?";
 }
