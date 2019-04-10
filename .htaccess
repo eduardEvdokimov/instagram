@@ -1,4 +1,4 @@
-AddDefaultCharset UTF-8
+AddDefaultCharset UTF-8 
 
 Options -Indexes
 
@@ -10,12 +10,19 @@ ErrorDocument 404 http://instagram/not_found.html
 RewriteEngine On
 RewriteBase /
 
+RewriteCond %{REQUEST_URI} !/search/search/$ 
+RewriteCond %{REQUEST_URI} ^/search/(.*)/$
+RewriteRule ^www/([a-z]+)/(.*)/$ /?controller=$1&action=index&hashtag=$2 [L]
+
 
 RewriteCond %{REQUEST_URI} ^/user/subscribe/$ [OR]
 RewriteCond %{REQUEST_URI} ^/user/unSubscribe/$ [OR]
+RewriteCond %{REQUEST_URI} ^/user/getSubUsers/$ [OR]
 RewriteCond %{REQUEST_URI} !^/user/.*/$ 
 RewriteRule ^www/([a-z]+)/([a-zA-Z]+)/$ /?controller=$1&action=$2&%{QUERY_STRING} [L,QSA]
 
+RewriteCond %{REQUEST_URI} ^/settings/$
+RewriteRule ^.*$ /?controller=settings&action=index [L]
 
-RewriteRule ^www/user/([a-zA-Z0-9]+)/$ /?controller=user&action=index&id=$1 [L]
+RewriteRule ^www/user/(\S+)/$ /?controller=user&action=index&id=$1 [L]
 
