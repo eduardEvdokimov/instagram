@@ -2,10 +2,10 @@
 /*
 	Основные функции нужные по всему сайту
 */
-require_once '../config/config.php';
+require_once '../config/config.php';//Константы сайта
 require_once '../lib/sql_request.php'; //Файл с запросами к БД
-$GLOBALS['SQL'] = new SqlRequest(); //Объект со всеми запросами к БД
 
+$GLOBALS['SQL'] = new SqlRequest(); //Объект со всеми запросами к БД
 
 //Загружает страницу по заданному контроллеру и заданной функции
 function loadPage($controllerName, $actionName)
@@ -24,9 +24,9 @@ function createSmarty()
 	$template = 'default/'; // Имя шаблона сайта
 
 	$smarty->template_dir = PREFIX_TEMPLATE . $template;
-	$smarty->cache_dir = '/instagram/tmp/smarty/cache/';
-	$smarty->compile_dir = '/instagram/tmp/smarty/compile_c/';
-	$smarty->config_dir = '/instagram/lib/Smarty/config/';
+	$smarty->cache_dir = '../tmp/smarty/cache/';
+	$smarty->compile_dir = '../tmp/smarty/compile_c/';
+	$smarty->config_dir = '../lib/Smarty/config/';
 	
 	return $smarty;
 }
@@ -37,14 +37,14 @@ function loadTemplate($smarty, $templateName)
 	$smarty->display($templateName . POSTFIX_TEMPLATE);
 }
 
-
 /*
 param connection PDO object
 param login string
 	Извлекает и БД данные пользователя по логину.
 	Если не удалось извлечь, или пользователь не найден возвращает false, иначе ассоциативный массив с данными пользователя
 */
-function getDataUserInLogin(PDO $connection, $login){
+function getDataUserInLogin(PDO $connection, $login)
+{
 	//Извлекаем пользователя по логину, чтобы узнать его id
 	$sql = $connection->prepare($GLOBALS['SQL']->select_user_from_login);
 	

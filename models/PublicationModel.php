@@ -1,13 +1,6 @@
 <?php 
-/*
-param $connection PDO object
-param $user_id int
-param $photo array
-param $title string
-param $hashtags string
-	Добавляет публикацию в БД
-	Возвращает в случае успешного добавлния публикации true,если данные не прошли проверку на правильность возвращает массив с ошибками, если возникли проблемы со стороны сервера возвращает false
-*/
+//Работа с публикациями
+
 require_once '../lib/MainFunction.php';//Основные функции для работы сайта
 require_once '../lib/create_relative_date.php'; //Подключаем функцию формирования относительной даты
 require_once '../lib/sql_request.php'; //Подключаем класс со всеми SQL запросами
@@ -27,7 +20,10 @@ function addPublication(PDO $connection, $user_login, $photo, $title, $hashtags)
 	$user = getDataUserInLogin($connection, $user_login);
 
 	//Проверка, пользователь загрузил картинку или другой файл
-	if($photo['type'] != 'image/jpeg' && $photo['type'] != 'image/jpg' && $photo['type'] != 'image/png' && $photo['type'] && 'image/gif'){
+	if ($photo['type'] != 'image/jpeg' && 
+		$photo['type'] != 'image/jpg' && 
+		$photo['type'] != 'image/png' && 
+		$photo['type'] && 'image/gif'){
 		// Если тип файла не подходит ни к одному из типов картинок, возвращаем ошибку
 		$result['image'] = 'Нужно загрузить картинку';
 		return $result;
@@ -105,7 +101,7 @@ param login int
 */
 function getUserPublication(PDO $connection, $login)
 {
-	
+	//Получаем данные пользователя по логину
 	$user = getDataUserInLogin($connection, $login);
 	
 	$sql = $connection->prepare($GLOBALS['SQL']->select_user_publications);
@@ -134,7 +130,7 @@ param connection Object PDO
 param user_login string
 param count_pub int 
 	Извлекает 12 записей начиная с опреденной позиции. 
-	Служит для ассинхронной подгрузки публикаций на страницу. 
+	Служит для подгрузки публикаций на страницу. 
 	Возвращает в случае успешного извлечения публикаций массив с ними, в противном случае false
 */
 function loadingPublication(PDO $connection, $user_login, $count_pub)
@@ -171,7 +167,6 @@ param public_id int
 */
 function getFullDataPublication(PDO $connection, $public_id)
 {
-
 	$data = []; //Массив для промежуточных данных
 	$result = []; //Массив результата
 
@@ -208,8 +203,15 @@ function getFullDataPublication(PDO $connection, $public_id)
 		$data = $sql->fetch(PDO::FETCH_ASSOC);
 
 		if(!empty($data)){
+			
+			
 			$data = explode(',', $data["hashtag"]); //Формируем массив с хештегами
-			$result['hashtags'] = $data;
+
+			foreach ($data as $value) {
+				$hashtags[] = "<a href='http://instagram/search/" . str_replace(['х', '#'], [']}]', ''], $value) . "/'>{$value}</a>";
+			}
+
+			$result['hashtags'] = $hashtags;		
 		}
 	}else return false;
 
@@ -247,7 +249,6 @@ param comment string
 */
 function addComment(PDO $connection, $id_user, $public_id, $comment)
 {
-
 	$data = []; //Промежуточные данные
 
 	$comment = htmlspecialchars(trim($comment)); //Очистка данных
@@ -264,27 +265,18 @@ function addComment(PDO $connection, $id_user, $public_id, $comment)
 	if($sql->execute([$id_user, $id_publication, $comment])){
 		$id_comment = $connection->lastInsertId();
 
-
 		$sql = $connection->prepare($GLOBALS['SQL']->sql_get_last_Insert_user);
-
 		$sql->execute([$data['parent_id']]);
-
 		$user = $sql->fetch(PDO::FETCH_ASSOC);
-		
+
+		//Проверяем, что оставили комментарий не под своей публикацией, для добавления уведомления
 		if($id_user != $user['id']){
-			$add_action_comment = 'INSERT INTO action_users (action_user, action, object, more) VALUES (?,?,?,?)';
-
-			$sql = $connection->prepare($add_action_comment);
-
+			$sql = $connection->prepare($GLOBALS['SQL']->add_action_comment);
 			$sql->execute([$id_user, 'add_comment', $user['id'], $id_comment]);
 		}
-			
-
 
 		return $id_comment;
 	}else return false;
-	
-
 }
 	
 /*
@@ -300,11 +292,10 @@ function checkPressLike(PDO $connection, $user_id, $public_id)
 
 	if($sql->execute([$public_id, $user_id])){
 		$data = $sql->fetch(PDO::FETCH_NUM);
-		if(!empty($data)){
+		if(!empty($data))
 			return true;
-		}else{
+		else
 			return false;
-		}
 	}	
 }
 
@@ -322,57 +313,48 @@ function commentCheckPressLike(PDO $connection, $user_id, $comment_id)
 	if($sql->execute([$user_id, $comment_id])){
 		$data = $sql->fetch();
 
-		if(!empty($data)){
+		if(!empty($data))
 			return true;
-		}else return false;
-
-	}else return false;
-}
-
-
-/*
-param connection PDO object
-param id_user int
-param $public_id string
-	Добавление удаление лайка у комментария. 
-	Возвращает в случае успешной работы с БД true, в противном случае false
-*/
-function delLikeComment(PDO $connection, $user_id, $comment_id)
-{
-	$sql = $connection->prepare($GLOBALS['SQL']->drop_like_comment);
-
-	if($sql->execute([$user_id, $comment_id])){
-		$sql = $connection->prepare($GLOBALS['SQL']->decrement_like_comment);
-
-		if($sql->execute([$comment_id])){
-
-			$select_user_from_comment_id = 'SELECT users.id, comments.parent_id_user FROM users, comments WHERE comments.id=? AND users.id=comments.parent_id_user';
-
-			$sql = $connection->prepare($select_user_from_comment_id);
-
-			$sql->execute([$comment_id]);
-
-			$user = $sql->fetch(PDO::FETCH_ASSOC);
-
-			if($user_id != $user['id']){
-
-				$action_del_like_comment = "DELETE FROM action_users WHERE action_user=? AND action='like_comment' AND more=?";
-
-				$sql = $connection->prepare($action_del_like_comment);
-
-				$sql->execute([$user_id, $comment_id]);
-			}
-
-
-
-			return true;
-		}
-		else
+		else 
 			return false;
 
 	}else return false;
 }
 
+/*
+param connection PDO object
+param id_user int
+param $public_id string
+	Удаление лайка у комментария. 
+	Возвращает в случае успешной работы с БД true, в противном случае false
+*/
+function delLikeComment(PDO $connection, $user_id, $comment_id)
+{	
+	//Удаление лайка у комментария
+	$sql = $connection->prepare($GLOBALS['SQL']->drop_like_comment);
+
+	if($sql->execute([$user_id, $comment_id])){
+		//Уменьшение количества лайков у комментария
+		$sql = $connection->prepare($GLOBALS['SQL']->decrement_like_comment);
+
+		if($sql->execute([$comment_id])){
+			//Извлекает пользователя под чьим постом был комментарий
+			$sql = $connection->prepare($GLOBALS['SQL']->select_user_from_comment_id);
+			$sql->execute([$comment_id]);
+			$user = $sql->fetch(PDO::FETCH_ASSOC);
+			//Проверяем, что удалили лайк не у своего комментария
+			if($user_id != $user['id']){
+				//Удаляем уведомление у пользователя
+				$sql = $connection->prepare($GLOBALS['SQL']->action_del_like_comment);
+				$sql->execute([$user_id, $comment_id]);
+			}
+
+			return true;
+		}
+		else
+			return false;
+	}else return false;
+}
 
 /*
 param connection PDO object
@@ -383,40 +365,29 @@ param $comment_id int
 */
 function addLikeComment(PDO $connection, $user_id, $comment_id)
 {
-
+	//Добавляет лайк комментарию
 	$sql = $connection->prepare($GLOBALS['SQL']->add_like_comment);
 
 	if($sql->execute([$user_id, $comment_id])){
+		//Увеличивает количество лайков комментария
 		$sql = $connection->prepare($GLOBALS['SQL']->increment_like_comment);
 
 		if($sql->execute([$comment_id])){
-
-			$select_user_from_comment_id = 'SELECT users.id, comments.parent_id_user FROM users, comments WHERE comments.id=? AND users.id=comments.parent_id_user';
-
-			$sql = $connection->prepare($select_user_from_comment_id);
-
+			//Извлекает пользователя, чей комментарий
+			$sql = $connection->prepare($GLOBALS['SQL']->select_user_from_comment_id);
 			$sql->execute([$comment_id]);
-
 			$user = $sql->fetch(PDO::FETCH_ASSOC);
 
 			if($user_id != $user['id']){
-
-				$action_add_like_comment = 'INSERT INTO action_users (action_user, action, object, more) VALUES (?,?,?,?)';
-
-				$sql = $connection->prepare($action_add_like_comment);
-
+				//Добавляем уведомление пользователю
+				$sql = $connection->prepare($GLOBALS['SQL']->action_add_like_comment);
 				$sql->execute([$user_id, 'like_comment', $user['id'], $comment_id]);
 			}
-
-
 			return true;
-		}
-		else
-			return false;
-
+		
+		}else return false;
 	}else return false;
 }
-
 
 /*
 param connection PDO object
@@ -439,29 +410,18 @@ function addLike(PDO $connection, $user_id, $public_id)
 	if($sql->execute([$user_id, $pub_id])){
 		$sql = $connection->prepare($GLOBALS['SQL']->increment_like);
 		if($sql->execute([$pub_id])){
-
-			$select_user_from_public_id_pub = 'SELECT id, parent_id FROM publications WHERE public_id=?';
-
-			$sql = $connection->prepare($select_user_from_public_id_pub);
-
+			$sql = $connection->prepare($GLOBAL['SQL']->select_user_from_public_id_pub);
 			$sql->execute([$public_id]);
-
 			$publication = $sql->fetch(PDO::FETCH_ASSOC);
 
 			if($user_id != $publication['parent_id']){
-
-				$action_add_like_publication = 'INSERT INTO action_users (action_user, action, object, more) VALUES (?,?,?,?)';
-
-				$sql = $connection->prepare($action_add_like_publication);
-
+				$sql = $connection->prepare($GLOBALS['SQL']->action_add_like_publication);
 				$sql->execute([$user_id, 'like_publication', $publication['parent_id'], $publication['id']]);
 			}
-
 
 			return true;
 		}
 	}
-
 	return false;
 }
 
@@ -487,28 +447,17 @@ function delLike(PDO $connection, $user_id, $public_id)
 		$sql = $connection->prepare($GLOBALS['SQL']->decrement_likes);
 		if($sql->execute([$pub_id])){
 
-			$select_user_from_public_id_pub = 'SELECT id, parent_id FROM publications WHERE public_id=?';
-
-			$sql = $connection->prepare($select_user_from_public_id_pub);
-
+			$sql = $connection->prepare($GLOBALS['SQL']->select_user_from_public_id_pub);
 			$sql->execute([$public_id]);
-
 			$publication = $sql->fetch(PDO::FETCH_ASSOC);
 
 			if($user_id != $publication['parent_id']){
-
-				$action_del_like_publication = "DELETE FROM action_users WHERE action_user=? AND action='like_publication' AND more=?";
-
-				$sql = $connection->prepare($action_del_like_publication);
-
+				$sql = $connection->prepare($GLOBALS['SQL']->action_del_like_publication);
 				$sql->execute([$user_id, $publication['id']]);
 			}
-
-
 			return true;
 		}
 	}
-
 	return false;
 }
 
@@ -517,10 +466,8 @@ param connection PDO object
 param user_id int
 	Возвращает новые публикации пользователей на которых подписан
 */
-
 function getNewPublications(PDO $connection, $user_id)
 {
-
 	$sql = $connection->prepare($GLOBALS['SQL']->select_new_publications);
 	//Проверка успешности работы с БД
 	if(!$sql->execute([$user_id]))
@@ -528,12 +475,14 @@ function getNewPublications(PDO $connection, $user_id)
 
 	$publications = $sql->fetchAll(PDO::FETCH_ASSOC);
 	$sql = $connection->prepare($GLOBALS['SQL']->select_comment_pub);
+	$sql_hashtag = $connection->prepare($GLOBALS['SQL']->select_hastags_pub);
 	//Проходим по каждой публикации
 	foreach($publications as $value){
 		//Преобразуем дату публикации в относительный вид
 		$value['pub_date'] = mb_strtoupper(relativeDate($value['pub_date']));
 		//Узнаем лайкал ли позователь публикацию
 		$value['check_like'] = checkPressLike($connection, $user_id, $value['public_id']);
+
 
 
 		if($value['check_like']){
@@ -548,6 +497,18 @@ function getNewPublications(PDO $connection, $user_id)
 		//Извлекаем комментарии для публикации
 		$sql->execute([$value['id']]);
 		$value['comment'] = $sql->fetchAll(PDO::FETCH_ASSOC);
+
+		$sql_hashtag->execute([$value['id']]);
+
+		$data = $sql_hashtag->fetch(PDO::FETCH_ASSOC);
+
+		$data = explode(',', $data["hashtag"]); //Формируем массив с хештегами
+
+		if(!empty($data))
+		foreach ($data as $hashtag) {
+			$value['hashtags'] .= "<a href='http://instagram/search/" . str_replace(['х', '#'], [']}]', ''], $hashtag) . "/'>{$hashtag}</a>&nbsp;";
+		}
+
 
 		if(count($value['comment']) > 3)
 			//Если комментариев больше 3 добавляем кнопку подгрузки комментариев
@@ -572,10 +533,8 @@ function getNewPublications(PDO $connection, $user_id)
 				$count++;
 			}
 		}
-
 		$result[] = $value;
 	}
-
 	return $result;
 }
 
@@ -608,7 +567,6 @@ function loadingNewPublication(PDO $connection, $user_id, $count_pub)
 		//Узнаем лайкал ли позователь публикацию
 		$value['check_like'] = checkPressLike($connection, $user_id, $value['public_id']);
 
-
 		if($value['check_like']){
 			$value['button_like'] = "<button id='button_like' onclick='delLike(event)'><img src='/img/cyte/heart_red.png' alt=''></button>";
 			$value['dbl_click_like'] = 'falseLike(event)';
@@ -645,14 +603,10 @@ function loadingNewPublication(PDO $connection, $user_id, $count_pub)
 				$count++;
 			}
 		}
-
 		$result[] = $value;
 	}
 	return $result;
 }
-
-
-
 
 /*
 param connection PDO Object
@@ -673,7 +627,6 @@ function loadComments(PDO $connection, $publication_id, int $start)
 		$result = $sql->fetchAll(PDO::FETCH_ASSOC);
 	}else return false;
 
-
 	foreach ($result as $comment) {
 		//Определяем лайкал ли пользователь комментарий
 		if(commentCheckPressLike($connection, $_SESSION['user']['id'], $comment['id']))
@@ -689,97 +642,89 @@ function loadComments(PDO $connection, $publication_id, int $start)
 	return $result;
 }
 
-
+//Извлекает пользователей, хештеги, которые совпадает с запросом
 function searchRequest(PDO $connection, $search)
 {
-
-	$search_users = "SELECT * FROM users WHERE login LIKE  ? OR name LIKE ?";
-	$search_hashtags = "SELECT * FROM hashtags WHERE hashtag LIKE ?";
-
-	$sql = $connection->prepare($search_users);
-
+	$sql = $connection->prepare($GLOBALS['SQL']->search_users);
+	//Формируем строку для поиска по пользователям, удаляем символ хештега
 	$search = str_replace('#', '', $search);
 
 	if(!$sql->execute(['%' . $search . '%','%' . $search . '%']))
 		return faslse;
 
 	$result = $sql->fetchAll(PDO::FETCH_ASSOC);
-
+	//Проверяем, нашлись ли пользователи
 	if(count($result) > 0)
+	//Если нашлись проходимся по каждому и формируем html
 	foreach ($result as $value) {
-
+		//Проверяем есть ли у пользователя имя
 		if($value['name'] == null){
-			
 
 			$item = "<a href='http://instagram/user/{$value['login']}/'><li><img src='/img/users_avatar/{$value['avatar']}' alt=''><div>";
 			$item .= "<p class='login'>{$value['login']}</p></div></li></a>";
+
 		}else{
 
 			$item = "<a href='http://instagram/user/{$value['login']}/'><li><img src='/img/users_avatar/{$value['avatar']}' alt=''><div>";
 			$item .= "<p class='login'>{$value['login']}</p>";
 			$item .= "<p class='name'>{$value['name']}</p></div></li></a>";
+
 		}
 
-		$r[] = $item;
+		$final_result[] = $item;
 	}
 
-		
-	$sql = $connection->prepare($search_hashtags);
-
+	//Извлекаем хештеги, соответствующие поиску
+	$sql = $connection->prepare($GLOBALS['SQL']->search_hashtags);
 
 	if(!$sql->execute(['%#' . $search . '%']))
 		return false;
 
 	$hashtags = $sql->fetchAll(PDO::FETCH_ASSOC);
-
+	//Проверяем есть ли хештеги
 	if(!empty($hashtags)){
-
+		//Получаем количество публикаций определенного хештега
 		$count_pub_in_hashtag = count($hashtags);
-		
-	
+		//Формируем паттерн, для извлечение хештега которого искали из строки хештегов БД
 		$pattern = sprintf("/(#%s[^,]*)/su", $search);
 	
 		preg_match($pattern, $hashtags[0]['hashtag'], $m);
-		$filter_hashtag = $m[1];
+		$filter_hashtag = $m[1]; //Получаем нужный хештег
+		//Кодируем русскую букву х
 		$url_hashtag = str_replace(['#', 'х'], ['', ']}]'], $filter_hashtag);
 
-
-
-
+		//Формируем html хештега
 		$item = "<a href='http://instagram/search/{$url_hashtag}/'><li><img src='/img/cyte/hashtag.jpeg' alt=''><div>";
 		$item .= "<p class='login'>{$filter_hashtag}</p>";
 		$item .= "<p class='name'><span>{$count_pub_in_hashtag}</span> публикаций</p></div></li></a>";
-		$r[] = $item;
-			
-	}
 
-	return $r;
+		$final_result[] = $item;
+	}
+	return $final_result;
 }
  
-
+//Извлекает публикации по хештегу
 function getPublicationInHashtag(PDO $connection, $hashtag)
 {
-	$select_publication_in_hashtag = "SELECT parent_id_publication FROM hashtags WHERE hashtag LIKE ?";
+	$sql = $connection->prepare($GLOBALS['SQL']->select_publication_in_hashtag);
 
-	$sql = $connection->prepare($select_publication_in_hashtag);
-
-	$hashtag_sql = '%' . $hashtag . '%';
+	$hashtag_sql = '%' . $hashtag . '%'; //Формируем параметр для вставки в запрос
 
 	if(!$sql->execute([$hashtag_sql]))
 		return false;
 
 	$data = $sql->fetchAll(PDO::FETCH_ASSOC);
+	//Проходимся по всем публикациям и получаем внешние id
 	foreach ($data as  $value) {
 		$dat[] = $value['parent_id_publication'];
 	}
+	//Получаем количество публикаций
 	$count_publication = count($data);
-
+	//Подготавливаем количество параметров в запросе
 	$sql_param =  implode(',', explode(' ', trim(str_repeat('? ', $count_publication))));
-	
+
 	$select_publication = "SELECT * FROM publications WHERE id IN($sql_param)";
-
 	$sql = $connection->prepare($select_publication);
-
 
 	if(!$sql->execute($dat))
 		return false;
@@ -797,6 +742,31 @@ function getPublicationInHashtag(PDO $connection, $hashtag)
 				$result[] = $value;
 			}
 		}
-
 	return $result;
+}
+
+//Удаляет публикацию
+function deletePublication(PDO $connection, $public_id_publication)
+{
+	$sql = $connection->prepare($GLOBALS['SQL']->select_pub_public_id);
+
+	if(!$sql->execute([$public_id_publication]))
+		return false;
+
+	$publication = $sql->fetch(PDO::FETCH_ASSOC);
+
+	//Удаляем фотографию публикации
+	unlink('img/users_publications/' . $publication['img']);
+
+	$sql = $connection->prepare($GLOBALS['SQL']->decrement_count_publications);
+
+	if(!$sql->execute([$publication['parent_id']]))
+		return false;
+
+	$sql = $connection->prepare($GLOBALS['SQL']->delete_publication);
+
+	if(!$sql->execute([$public_id_publication]))
+		return false;
+
+	return true;
 }

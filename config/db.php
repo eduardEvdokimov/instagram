@@ -1,4 +1,5 @@
 <?php
+//Подключение к БД
 
 define('HOST', 'localhost');
 define('LOGIN', 'root');

@@ -1,5 +1,6 @@
 <?php
 
+//Формирует относительную дату
 function relativeDate($date)
 {
 	$result; //Строка с финальной датой
@@ -92,5 +93,4 @@ function relativeDate($date)
 	}
 
 	return $result;
-
 }

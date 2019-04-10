@@ -31,5 +31,3 @@ $actionName = isset($_REQUEST['action']) ? $_REQUEST['action'] : 'index';
 $actionName .= 'Action'; 
 
 loadPage($controllerName, $actionName);
-
-

@@ -1,4 +1,3 @@
-
 <div id='user_info_block'>
 	<div id='user_content'>
 		<img src='/img/users_avatar/{$user.avatar}' alt=''>
@@ -11,8 +10,8 @@
 				{$dropDownList}
 			</div>
 			<p class='count_info' style="cursor: text"><span class='number'>{$user.count_publications}</span>&nbsp;публикаций</p>
-			<p class='count_info' onclick='showWindowListUsers(event);'><span class='number'>{$user.count_subscribers}</span>&nbsp;подписчиков</p>
-			<p class='count_info' onclick='showWindowListUsers(event);'><span class='number'>{$user.count_subscriptions}</span>&nbsp;подписок</p>
+			<p class='count_info' name='subscribers' onclick='showWindowListUsers(event);'><span class='number'>{$user.count_subscribers}</span>&nbsp;подписчиков</p>
+			<p class='count_info' name='subscriptions' onclick='showWindowListUsers(event);'><span class='number'>{$user.count_subscriptions}</span>&nbsp;подписок</p>
 		</div>
 		<div id='about_block'>
 			<p>{$user.name}</p>
@@ -20,116 +19,64 @@
 			<p>{$user.web_cyte}</p>
 		</div>
 	</div>
-
 </div>
-
-
-<div id='bg_popup_window' >
+<div id='bg_popup_window' class="hidden">
 	<div id='popup_window_user_list'>
 		<div id='head'>
-			<h2>Подписчики</h2>
+			<h2></h2>
 		</div>
 		<div id='list_users'>
-			<ul>
-				<li>
-					<img src='/img/users_avatar/5385bd4228a99b3647537793bf5f584b.jpg' alt=''>
-					<div>
-						<p id='login'>kosmas</p>
-						<p id='name'>Эдуард Евдокимов</p>
-					</div>
-					<p id='btn'>Подписаться</p>
-				</li>
-				<li>
-					<img src='/img/users_avatar/5385bd4228a99b3647537793bf5f584b.jpg' alt=''>
-					<div>
-						<p id='login'>kosmas</p>
-						<p id='name'>Эдуард Евдокимов</p>
-					</div>
-					<p id='btn'>Подписаться</p>
-				</li>
-				<li>
-					<img src='/img/users_avatar/5385bd4228a99b3647537793bf5f584b.jpg' alt=''>
-					<div>
-						<p id='login'>kosmas</p>
-						<p id='name'>Эдуард Евдокимов</p>
-					</div>
-					<p id='btn'>Подписаться</p>
-				</li>
-				<li>
-					<img src='/img/users_avatar/5385bd4228a99b3647537793bf5f584b.jpg' alt=''>
-					<div>
-						<p id='login'>kosmas</p>
-						<p id='name'>Эдуард Евдокимов</p>
-					</div>
-					<p id='btn'>Подписаться</p>
-				</li>
-				<li>
-					<img src='/img/users_avatar/5385bd4228a99b3647537793bf5f584b.jpg' alt=''>
-					<div>
-						<p id='login'>kosmas</p>
-						<p id='name'>Эдуард Евдокимов</p>
-					</div>
-					<p id='btn'>Подписаться</p>
-				</li>
-				<li>
-					<img src='/img/users_avatar/5385bd4228a99b3647537793bf5f584b.jpg' alt=''>
-					<div>
-						<p id='login'>kosmas</p>
-						<p id='name'>Эдуард Евдокимов</p>
-					</div>
-					<p id='btn'>Подписаться</p>
-				</li>
-				<li>
-					<img src='/img/users_avatar/5385bd4228a99b3647537793bf5f584b.jpg' alt=''>
-					<div>
-						<p id='login'>kosmas</p>
-						<p id='name'>Эдуард Евдокимов</p>
-					</div>
-					<p id='btn'>Подписаться</p>
-				</li>
+			<ul>				
 			</ul>
 		</div>
 	</div>
 </div>
-
-
-
-
-
 <div id='background_form' class='hidden'>
-
 	<div id='form_publications'>
-		<input type='file' name='file' id='file' multiple=""><br>
-		<p>Описание</p>
-		<textarea name="article" id='article' rows='5' cols="30"></textarea><br>
-		<p>Хештеги</p>
-		<textarea name='hashtags' id='hashtags' rows='5' cols="30"></textarea><br>
-		<button name="Опубликовать" onclick='addPublication();' >Опубликовать</button>
-		<p id='message'></p>
+		<div id='form'>
+			<p>Добавьте фотографию</p>
+			<input type='file' name='file' id='file' multiple="">
+			<p>Описание</p>
+			<textarea name="article" id='article' rows='5' cols="30"></textarea>
+			<p>Хештеги</p>
+			<textarea name='hashtags' id='hashtags' rows='5' cols="30"></textarea>
+			<p id='message'></p>
+			<button name="Опубликовать" onclick='addPublication();' id='send'>Опубликовать</button>
+			
+		</div>
 	</div>
-
-</div>
-	
+</div>	
 <p id='p'></p>
 <div class='table_publications'>
 	<div class='center_content' onclick='showBigPublication(event);'>
-
-
 		{foreach from=$publications key=k item=value}
-
 			<div class='item_publication' id="{$value.public_id}">
-				<img src="/img/users_publications/{$value.img}"  alt='' >
+				<img src="/img/users_publications/{$value.img}"  alt=''>
 				<div class='background_publication' >
+					{$btn_delete_publication}
 					<p class='likes_comment'>
-						<span><i class="fas fa-heart">{$value.likes}</i></span>
-						<span><i class="fas fa-comment">{$value.comment}</i></span>
+						<span><i class="fas fa-heart">&nbsp;<span>{$value.likes}</span></i></span>
+						<span><i class="fas fa-comment">&nbsp;<span>{$value.comment}</span></i></span>
 					<p>
 				</div>
 			</div>
-
 		{/foreach}
 	</div>
 <div>
+<div id='bg_popup_confirmation' class="hidden">
+	<div id='form'>
+		<div id='msg_btn_confirmed'>
+			<p>Вы точно хотите удалить публикацию. Ее нельзя будет восстановить.</p>
+			<input type="hidden" id='' class='public_id_publication_delete'>
+			<button onclick='deletePublication(event)' id='delete' class="btn">Удалить</button>
+			<button id='cancel' class="btn" onclick='deletePublication(event)'>Отмена</button>
+		</div>
+		<p id='msg_confirmed' class='hidden'>Публикация успешно удалена.</p>
+	</div>
+</div>
+
+
+
 
 
 <div class='hidden' id='background_window_pub'>

@@ -1,8 +1,8 @@
 <?php
-require_once '../lib/create_relative_date.php';
-require_once '../lib/sql_request.php';
-$GLOBALS['SQL'] = new SqlRequest;
+//Работа с данными уведомлений БД 
 
+require_once '../lib/create_relative_date.php';//Подключаем функцию относительной даты
+require_once '../lib/sql_request.php';
 
 //Извлекает количество непрочитанных уведомлений пользователя
 function getCountNotification(PDO $connection, $user_id)
@@ -12,6 +12,7 @@ function getCountNotification(PDO $connection, $user_id)
 	$sql->execute([$user_id]);
 	$data = $sql->fetch(PDO::FETCH_ASSOC);
 	$result = $data['COUNT(*)'];
+
 	return $result;
 }
 
@@ -25,10 +26,13 @@ function getNotificationUser(PDO $connection, $user_id)
 	if(!$sql->execute([$user_id])){
 		return false;
 	}
+
 	//Получаем массив с уведомлениями
 	$notification = $sql->fetchAll(PDO::FETCH_ASSOC);
+
 	//Извлечение данных пользователя сделавшего активность на нашем аккаунте
 	$sql = $connection->prepare($GLOBALS['SQL']->sql_get_last_Insert_user);
+	//Обновление статуса уведомления
 	$sql_update = $connection->prepare($GLOBALS['SQL']->update_checked);
 
 	//Проверяем, есть ли уведомления
@@ -41,15 +45,17 @@ function getNotificationUser(PDO $connection, $user_id)
 		$now_date = new DateTime;//Текущая дата
 		$date_add_action = new DateTime($value['action_date']);//Дата дейстия пользователя
 		$diff = $now_date->diff($date_add_action);//Разница текущей даты и даты действия
+
 		//Проверяем видел ли пользователь данное уведомление
 		if($value['checked'])
 			$class = 'class=\'long_date\''; //Если видел, добавляем класс для затемнения фона
 		else
 			$class = '';
+		
 		//Если прошло больше 7 дней с момента получения уведомления, не отображаем его
 		if($diff->format('%d') >= 7)
 			continue;
-
+		
 		$sql_update->execute([$value['id']]);
 		//Формируем относительную дату
 		$value['date'] = relativeDate($value['action_date']);

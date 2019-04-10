@@ -3,8 +3,8 @@
 	padding: 0;
 }
 
-body{
-	background: url('../../img/cyte/background1.png');
+a{
+	color: black;
 }
 
 #body_document{
@@ -58,7 +58,6 @@ body{
 	width: 100%;
 	float: left;
 	position: relative;
-
 }
 
 
@@ -74,6 +73,7 @@ body{
 	left: 0;
 	right: 0;
 }
+
 #heart{
 	opacity: 0.0;
 	height: 50px;
@@ -95,6 +95,7 @@ body{
 	cursor: pointer;
 	outline: none;
 	margin: 5px 0 5px 10px;
+	color: #1EACFE;
 	
 }
 
@@ -110,6 +111,11 @@ body{
 
 .article_publication{
 	margin: 5px 10px 5px 10px;
+}
+
+.article_publication > a{
+	color: #1EACFE;
+	text-decoration: none;
 }
 
 .list_comments > ul{
@@ -135,6 +141,10 @@ body{
 	float: left;
 	display: inline-block;
 
+}
+
+.list_comments > ul > li > p > a{
+	text-decoration: none;
 }
 
 .login{
@@ -217,9 +227,8 @@ body{
 
 #list_users{
 	width: 100%;
-	
-
 }
+
 
 #list_users > ul{
 	list-style-type: none;
@@ -252,7 +261,8 @@ body{
 	float: right;
 	margin-top: 17px;
 	margin-right: 10px;
-	color: #089dd4;
+	color: #1EACFE;
+	outline: none;
 	background: none;
 	border: none;
 	cursor: pointer;

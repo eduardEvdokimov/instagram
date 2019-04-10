@@ -1,13 +1,12 @@
 //Добавляет новую публикацию в БД
 function addPublication()
 {
+	var formData = new FormData(); //Объявляем объект для удобного отсыла на сервер данных
 	var title = $('#article').val(); //Получаем описание 
 	var hashtags = $('#hashtags').val(); //Получаем хештеги 
 	var url = window.location.pathname; //Получаем URI
 	var array_user_id = url.match(/user\/(\S+)\//); //Извлекаем из URI id пользователя
-	
 	var user_login = array_user_id[1]; //Получаем id
-	
 	var form = $('#form_publications'); //Получаем объект формы для достука с ее элементам
 	var message = $('#message'); //Получаем элемент с выводом сообщений
 
@@ -20,8 +19,6 @@ function addPublication()
 		message.text('Нужно выбрать фотографию');
 		return false;
 	}
-
-	var formData = new FormData(); //Объявляем объект для удобного отсыла на сервер данных
 
 	formData.append('title', title);
 	formData.append('hashtags', hashtags);
@@ -42,8 +39,7 @@ function addPublication()
 			form.find('input').prop('disabled', true);
 		},
 		success: function(data){
-			console.log(data);
-		//В случае успешной работы сервера проверяем на ошибки
+			//В случае успешной работы сервера проверяем на ошибки
 			if(data['image']){
 				//Если есть ошибки по части картинки
 				message.text(data['image']);
@@ -54,10 +50,9 @@ function addPublication()
 			}
 			if(data['success']){
 				//Если ошибок нет
-				
 				var content = "<div class='item_publication' id='" + data['public_id_publication'] + "'>";
 				content += "<img src='/img/users_publications/" + data['image_publication'] + "' alt=''>";
-				content += "<div class='background_publication'><p class='likes_comment'>";
+				content += "<div class='background_publication'><p id='delete_publication' onclick='comfirmedForm(event)'><i class='fas fa-times'></i></p><p class='likes_comment'>";
 				content += "<span><i class='fas fa-heart'>0</i></span>";
 				content += "<span><i class='fas fa-comment'>0</i></span><p></div></div>";
 
@@ -75,22 +70,24 @@ function addPublication()
 			//В случае ошибки по части ответа от сервера 
 			message.text('Ошибка отправки');
 		}
-
 	});
 }
 
 
 //Отслеживаем нажатие на публикацию, для отображение большого окна публикации
-function showBigPublication(event){
-
+function showBigPublication(event)
+{
+	var data = new FormData();
 	var element = event.target; //Получаем объект кажатого элемента
-
+	//Id дочернего элемента блока с class = item_publication
+	var id_publication = element.closest('.item_publication').id; 
+	
 	if(element.className == 'center_content')
 		return;
 
-	var id_publication = element.closest('.item_publication').id; //Id дочернего элемента блока с class = item_publication
+	if($(element).closest('#delete_publication').length)
+		return;
 
-	var data = new FormData();
 	data.append('pub_id', id_publication);
 
 	$.ajax({
@@ -107,18 +104,17 @@ function showBigPublication(event){
 		success: function(data){
 			var comments = new Array;
 			var hashtags = new Array;
-			console.log(data);
 			//Проверка, есть ли хештеги
 			if(data['hashtags']){	
-				$.each(data['hashtags'], function(index, item){
-					var hashtag = '<span>' + item + '</span>';
+				$.each(data['hashtags'], function(index, item){	
+					var hashtag = "<span>" + item + '</span>&nbsp;';
 					$('.hashtags').append(hashtag);
 				});	
+				
 			}
 			//Проверка, есть ли комментарии
 			if(data['comments']){
 				$.each(data['comments'], function(index, item){
-
 					var comment = "<li id='" + item['id'] + "'><p class='item_comment'><span id='login'>" + item['login'] + '</span>&ensp;<span id=comment>' + item['comment'] + '</span></p>';
 
 					if(item['press_like'] == true){
@@ -158,16 +154,67 @@ function showBigPublication(event){
 			$('#pub_date').html(data['pub_date']);
 			//Отображаем окно с публикацией
 			$('#background_window_pub').addClass('background_window_pub').removeClass('hidden');
-
+			//Делаем высоту фона по высоте документа
 			$('.background_window_pub').css('height', $(window).height() + $(window).scrollTop());
-			
 			//Скрываем полосу прокрутки 
-			$("body").css("overflow","hidden");				
+			$("html").css("overflow","hidden");				
 		},
 		error: function(){
 			alert('Не удалось отобразить публикацию');
 		}
 	});
+}
+
+//Отображает форму подтверждения удаления публикации
+function comfirmedForm(event)
+{
+	//Получаем внешний id публикации
+	var public_id = $(event.target).closest('.item_publication').attr('id');
+	//Записываем в скрытое поле внешний id
+	$('.public_id_publication_delete').attr('id', public_id);
+
+	$('#msg_btn_confirmed').removeClass('hidden');
+	$('#msg_confirmed').addClass('hidden');
+
+	$('#bg_popup_confirmation').css('height', $(window).height() + $(window).scrollTop()).removeClass('hidden');
+	//Скрываем полосу прокрутки 
+	$("html").css("overflow","hidden");	
+}
+
+//Удаляет публикацию
+function deletePublication(event)
+{
+	var public_id = $('.public_id_publication_delete').attr('id');
+	
+	if(event.target.id == "cancel"){
+		$('#bg_popup_confirmation').addClass('hidden');
+		$("html").css("overflow","auto");
+		return;	
+	}
+
+	if(event.target.id == "delete"){
+		$.ajax({
+			type: 'post',
+			url: 'http://instagram/publication/deletePublication/',
+			data: {'public_id': public_id},
+			success: function(data){
+				if(data == true){
+					$('#msg_btn_confirmed').addClass('hidden');
+					$('#msg_confirmed').removeClass('hidden');
+					$('#'+public_id).remove();
+					setTimeout(function(){
+						$('#bg_popup_confirmation').addClass('hidden');
+						$("html").css("overflow","auto");
+					}, 3000);
+				}else{
+					alert('Произошла ошибка сервера. Попробуйте позже.');
+				}
+			},
+			error: function(){
+				alert('Произошла ошибка сервера. Попробуйте позже.');
+			}
+		});
+	}
 }
 
 //Установка фокуска на элемент
@@ -207,10 +254,8 @@ function addComment(event){
 					processData: false,
 					contentType: false,
 					success: function(data){
-						console.log(data);
 						var user_login = $('#my_login').html(); //Извлекаем из тега логин пользователя публикации
 						if(data){
-					
 							//Если скрипт запущен на странице пользователя
 							//Если true, формируем переменную для отображения комментария на странице
 							var content = '<li id=\'' + data + '\'><p class=item_comment><span id=login>' + user_login + '</span>&ensp;<span id=comment>' + comment + '</span></p>';
@@ -221,18 +266,14 @@ function addComment(event){
 							//Получаем дочерний элемент # + id_publication блока с классом center_content
 							var publication = $('.center_content').children('#' + id_publication);
 							// Ищем в JQuery объекте блок с классом fa-comment и извлекаем его
-							var comments = publication.find('.fa-comment');
+							var comments = publication.find('.fa-comment > span');
 							//Увеличиваем количество комментариев на 1
 							comments.html(Number(comments.html()) + 1);	
-						
-
 						}else{
 							alert('Не удалось добавить комментарий. Попробуйте позже.');
 						}
-
 						//Переводим инпут ввода комментария в значение по умолчанию
 						$('#addComment').val('').removeClass('comment_error').prop('placeholder', 'Добавьте комментарий...');
-
 					},
 					error: function(){
 						alert('Не удалось добавить комментарий. Попробуйте позже.');
@@ -247,11 +288,8 @@ function addComment(event){
 //Добавляет лайк публикации
 function addLike(event){
 	var publication_id = $('.visible_big_publication').attr('id');
-	
-	
-
-
 	var data = new FormData();
+	
 	data.append('publication_id', publication_id);
 
 	$.ajax({
@@ -261,20 +299,18 @@ function addLike(event){
 		processData: false,
 		contentType: false,
 		success: function(data){
+			//Меняем картинку на закрашенное сердце
+			$('#button_like > img').attr('src', '/img/cyte/heart_red.png');
+			//Меняем значение onclick на функцию удаления лайка
+			$('#button_like').attr('onclick', 'delLike(event)');
+			//Увеличиваем количество лайков на 1
+			$('#buttons > p > span').html(Number($('#buttons > p > span').html()) + 1);
 
-			
-				//Меняем картинку на закрашенное сердце
-				$('#button_like > img').attr('src', '/img/cyte/heart_red.png');
-				//Меняем значение onclick на функцию удаления лайка
-				$('#button_like').attr('onclick', 'delLike(event)');
-				//Увеличиваем количество лайков на 1
-				$('#buttons > p > span').html(Number($('#buttons > p > span').html()) + 1);
-
-				//Увеличиваем количество лайков на 1 на главной странице
-				var publication = $('.center_content').children('#' + publication_id);
-				var likes = publication.find('.fa-heart');
-				likes.html(Number(likes.html()) + 1);
-			
+			//Увеличиваем количество лайков на 1 на главной странице
+			var publication = $('.center_content').children('#' + publication_id);
+			var likes = publication.find('.fa-heart > span');
+			likes.html(Number(likes.html()) + 1);
+		
 		},
 		error: function(){
 			alert('Произошла ошибка. Попробуйте позже.');
@@ -282,12 +318,11 @@ function addLike(event){
 	});
 }
 
+//Удаляет лайк публикации
 function delLike(event){
 	var publication_id = $('.visible_big_publication').attr('id');
-
-
-
 	var data = new FormData();
+
 	data.append('publication_id', publication_id);
 
 	$.ajax({
@@ -297,20 +332,17 @@ function delLike(event){
 		processData: false,
 		contentType: false,
 		success: function(data){
+			//Меняем картинку на пустое сердце
+			$('#button_like > img').attr('src', '/img/cyte/heart.png');
+			//Меняем значение onclick на функцию добавления лайка
+			$('#button_like').attr('onclick', 'addLike(event)');
+			//Уменьшаем количество лайков на 1
+			$('#buttons > p > span').html(Number($('#buttons > p > span').html()) - 1);
 
-			
-				//Меняем картинку на пустое сердце
-				$('#button_like > img').attr('src', '/img/cyte/heart.png');
-				//Меняем значение onclick на функцию добавления лайка
-				$('#button_like').attr('onclick', 'addLike(event)');
-				//Уменьшаем количество лайков на 1
-				$('#buttons > p > span').html(Number($('#buttons > p > span').html()) - 1);
-
-				//Уменьшаем количество лайков на 1 на главной странице
-				var publication = $('.center_content').children('#' + publication_id);
-				var likes = publication.find('.fa-heart');
-				likes.html(Number(likes.html()) - 1);
-			
+			//Уменьшаем количество лайков на 1 на главной странице
+			var publication = $('.center_content').children('#' + publication_id);
+			var likes = publication.find('.fa-heart > span');
+			likes.html(Number(likes.html()) - 1);
 		},
 		error: function(){
 			alert('Произошла ошибка. Попробуйте позже.');
@@ -318,14 +350,15 @@ function delLike(event){
 	});
 }
 
-
+//Добавляет лайк комментарию
 function addLikeComment(event)
 {
 	var elemet_li = event.target.closest('li');
 	var comment_id = $(elemet_li).attr('id');
-	
 	var data = new FormData();
+	
 	data.append('comment_id', comment_id);
+	
 	$.ajax({
 		type: 'post',
 		url: 'http://instagram/publication/addLikeComment/',
@@ -333,7 +366,6 @@ function addLikeComment(event)
 		processData: false,
 		contentType: false,
 		success: function(data){
-			console.log(data);
 			if(data == true){
 				//Меняем картинку на закрашенное сердце
 				$(elemet_li).find('img').attr('src', '/img/cyte/heart_red.png');
@@ -349,15 +381,15 @@ function addLikeComment(event)
 	});
 }
 
-
-
+//Удаляет лайк комментария
 function delLikeComment(event)
 {
 	var elemet_li = event.target.closest('li');
 	var comment_id = $(elemet_li).attr('id');
-	
 	var data = new FormData();
+	
 	data.append('comment_id', comment_id);
+	
 	$.ajax({
 		type: 'post',
 		url: 'http://instagram/publication/delLikeComment/',
@@ -365,7 +397,6 @@ function delLikeComment(event)
 		processData: false,
 		contentType: false,
 		success: function(data){
-			console.log(data);
 			if(data == true){
 				//Меняем картинку на не закрашенное сердце
 				$(elemet_li).find('img').attr('src', '/img/cyte/heart.png');
@@ -381,23 +412,18 @@ function delLikeComment(event)
 	});
 }
 
-
+//Отслеживает скрол на странице пользователя, для подгрузки публикаций
 $(document).ready(function(){
-	
 	var inProgress = false; //Отслеживает запущен ли запрос к серверу
-
 	var count_pub = 12; //Начальное количество показанных новостей
-
 	var url = document.location.pathname;
-
-	var user_login = url.match(/user\/(\S+)(\/)/);
-	
+	var user_login = url.match(/user\/(\S+)(\/)/);	
 	var data = new FormData();
+	
 	data.append('user_login', user_login[1]);
 
 	$(window).scroll(function(){
 		if(($(window).scrollTop() + $(window).height() >= $(document).height() - 50) && !inProgress){
-
 			data.append('count_pub', count_pub);
 			
 			$.ajax({
@@ -412,23 +438,16 @@ $(document).ready(function(){
 					inProgress = true;
 				},
 				success: function(data){
-					console.log(data);
 					if(data.length > 0){
 						$.each(data, function(index, data){
-
 							var content = "<div class='item_publication' id=" + data['public_id'] + ">";
-
 							content += "<img src='/img/users_publications/" + data['img'] + "'alt=''>";
-
-							content += "<div class='background_publication'><p class='likes_comment'>";
-
-							content += "<span><i class='fas fa-heart'>" + data['likes'] + "</i></span>";
-
-							content += "<span><i class='fas fa-comment'>" + data['count_comment'] + "</i></span><p></div></div>";
-
+							content += "<div class='background_publication'><p id='delete_publication' onclick='comfirmedForm(event)'><i class='fas fa-times'></i></p>";
+							content += "<p class='likes_comment'>";
+							content += "<span><i class='fas fa-heart'>&nbsp;<span>" + data['likes'] + "</span></i></span>";
+							content += "<span><i class='fas fa-comment'>&nbsp;<span>" + data['count_comment'] + "</span></i></span></p></div></div>";
 
 							$('.center_content').append(content);
-
 						});
 						count_pub += 12;
 					}

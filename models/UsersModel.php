@@ -2,9 +2,9 @@
 /*
 	Модель для работы с пользователями
 */
+
 require_once '../lib/sql_request.php'; //Файл с запросами к БД
 require_once '../config/config.php'; //Константы, настройки сайта
-
 
 /*
 param connection PDO object
@@ -26,7 +26,6 @@ function checkExistLoginMail(PDO $connection, $login, $mail)
 		return $result; 
 	}
 
-
 	//Проверка существует ли пользователь с такой электронной почтой
 	$sql = $connection->prepare($GLOBALS['SQL']->sql_check_mail);
 	$sql->execute([$mail]);
@@ -40,8 +39,6 @@ function checkExistLoginMail(PDO $connection, $login, $mail)
 	return true;
 }
 
-
-
 /*
 param connection PDO object
 param login string
@@ -52,18 +49,14 @@ param name string
 */
 function registerUserAction(PDO $connection, $login, $mail, $password, $name)
 {
-	
-
 	//Генерируем код подтверждения регистрации
 	$key = md5($mail . time());
-
 
 	//Очистка данных
 	$login = htmlspecialchars(trim($login));
 	$mail = htmlspecialchars(trim($mail));
 	$password = htmlspecialchars(trim($password));
 	$name = !empty($name) ? htmlspecialchars(trim($name)) : null;
-
 
 	//Хештрование пароля
 	$passwordHash = password_hash(SOL . $password . SOL, PASSWORD_DEFAULT);
@@ -104,8 +97,6 @@ function mailAction($mail, $key)
 //Подтверждение регистрации аккаунта
 function confirmedAccaunt($connection, $key)
 {
-	
-
 	$sql = $connection->prepare($GLOBALS['SQL']->sql_update);
 	if($sql->execute([$key]))
 		return true;
@@ -114,11 +105,10 @@ function confirmedAccaunt($connection, $key)
 }
 
 
-
+//Авторизация пользователя в системе
 function loginUser(PDO $connection, $login_mail, $password)
 {
 	$result = array();
-
 
 	$sql = $connection->prepare($GLOBALS['SQL']->sql_select_user);
 	$sql->execute([$login_mail]);
@@ -193,26 +183,17 @@ function addSubscribe($connection, $user_id, $login_subscribe)
 		$sql->execute([$user_id]);
 
 		if($user_id != $user['id']){
-			$action_add_subscribe = 'INSERT INTO action_users (action_user, action, object) VALUES(?,?,?)';
-
-			$sql = $connection->prepare($action_add_subscribe);
-
+			$sql = $connection->prepare($GLOBALS["SQL"]->action_add_subscribe);
 			$sql->execute([$user_id, 'subscribe_user', $user['id']]);
 		}
-		
-
-
-
-
-
 
 		return true;
-	}
-	else{
+	}else{
 		return false;
 	}
 }
 
+//Удаление подписки
 function deletSubscribe(PDO $connection, $user_id, $login_subscribe)
 {
 	$user = getDataUserInLogin($connection, $login_subscribe);
@@ -229,16 +210,11 @@ function deletSubscribe(PDO $connection, $user_id, $login_subscribe)
 		$sql = $connection->prepare($GLOBALS['SQL']->del_update_count_subscriprions);
 		$sql->execute([$user_id]);
 
-
-		$action_del_subscribe = "DELETE FROM action_users WHERE action_user=? AND action='subscribe_user' AND object=?";
-
-		$sql = $connection->prepare($action_del_subscribe);
-
+		$sql = $connection->prepare($GLOBALS['SQL']->action_del_subscribe);
 		$sql->execute([$user_id, $user['id']]);
-
+	
 		return true;
-	}
-	else
+	}else
 		return false;
 }
 
@@ -267,13 +243,10 @@ param connection PDO Object
 param data array
 	Авторизация пользователя по аккаунту соц. сети Вконтакте
 */
-
 function registrationVK(PDO $connection, $data)
 {	
 	$variable = array(); // Промежуточные данные
 
-	
-	
 	$sql = $connection->prepare($GLOBALS['SQL']->sql_check_mail); //Проверка существует ли пользователь с такой электронной почтой
 	$sql->execute([$data['email']]);
 	$variable = $sql->fetch();
@@ -326,9 +299,7 @@ function registrationVK(PDO $connection, $data)
 				return $variable;
 			}
 		}
-
 	}
-
 }
 
 /*
@@ -387,4 +358,99 @@ function getRecomendateUsers(PDO $connection, $user_id)
 	}else return false;
 
 	return $data;
+}
+
+//Возвращает список подписчиков или подписок
+function getSubUsers(PDO $connection, $user_login, $type)
+{
+	//Определяем что запросил пользователь
+	if($type == 'subscribers'){
+		$subscribers_pole = 'sub_object';
+		$users_pole = 'id_subscriber';
+	}else{
+		$subscribers_pole = 'id_subscriber';
+		$users_pole = 'sub_object';
+	}
+
+	$user = getDataUserInLogin($connection, $user_login);
+
+	if($user == false) return false;
+
+	$select_sub_users = "SELECT subscribers.*, users.login, users.avatar, users.name, users.id FROM subscribers, users WHERE subscribers.{$subscribers_pole}=? AND users.id=subscribers.{$users_pole} ORDER BY date_register DESC";
+
+	$sql = $connection->prepare($select_sub_users);
+
+	if(!$sql->execute([$user['id']]))
+		return false;
+
+	$data = $sql->fetchAll(PDO::FETCH_ASSOC);
+
+	$sql = $connection->prepare($GLOBALS['SQL']->sql_check);
+
+	foreach ($data as $value) {
+		if(!$sql->execute([$_SESSION['user']['id'], $value['id']]))
+			return false;
+
+		$res = $sql->fetch(PDO::FETCH_ASSOC);
+
+		if($_SESSION['user']['id'] != $value['id'])
+			if(!empty($res)){
+				$value['button'] = "<button id='unsub' onclick='unSubscribe(event)'>Отписаться</button>";
+			}else{
+				$value['button'] = "<button id='sub' onclick='subscribe(event)'>Подписаться</button>";
+			}
+		$result[] = $value;
+	}
+	return $result;
+}
+
+//Изменяет пароль пользователя
+function restorePassword(PDO $connection, $login_mail)
+{
+	$sql = $connection->prepare($GLOBALS['SQL']->check_user_login_mail);
+
+	if(!$sql->execute([$login_mail, $login_mail]))
+		exit('Произошла ошибка сервера. Попробуйте позже.');
+
+	$data = $sql->fetch(PDO::FETCH_ASSOC);
+	
+	if(empty($data))
+		return false;
+	//Формируем код восстановления
+	$kode_restore = md5(date('dhis'));
+
+	$sql = $connection->prepare($GLOBALS['SQL']->add_kode_restore_pass);
+
+	if(!$sql->execute([$kode_restore, $data['login']]))
+		return false;
+
+	mail($data['mail'], 'Восстановление пароля', "Чтобы восстановить пароль перейдите по этой ссылке\r\n" . 'http://instagram/login/changePassword/?code=' . $kode_restore);
+
+	return true;
+}
+
+//Проверяет, наличие у пользователя кода восстановления пароля
+function checkUserInCode(PDO $connection, $code)
+{
+	$sql = $connection->prepare($GLOBALS['SQL']->select_user_in_code_restore);
+
+	if(!$sql->execute([$code]))
+		return false;
+
+	$data = $sql->fetch();
+
+	return empty($data) ? false : true;
+}
+
+//Сохранят новый пароль пользователя по коду восстановления
+function saveNewPassword(PDO $connection, $code, $password)
+{
+	$password = password_hash(SOL . htmlspecialchars(trim($password)) . SOL, PASSWORD_DEFAULT);
+
+	$sql = $connection->prepare($GLOBALS['SQL']->update_password);
+
+	if(!$sql->execute([$password, $code]))
+		return false;
+
+	return true;
 }

@@ -1,5 +1,5 @@
 <?php
-
+//Запросы к БД
 class SqlRequest{
 	//Извлекаем мыло для проверки, есть ли такой пользоватль
 	public $sql_check_mail = 'SELECT * FROM mails WHERE `mail`=?';
@@ -97,4 +97,40 @@ class SqlRequest{
 	public $update_checked = 'UPDATE action_users SET checked=1 WHERE id=?';
 	//Получает данные комментария по id
 	public $select_comment_in_id = "SELECT * FROM comments WHERE id=?";
+	//Добавление комментария
+	public $add_action_comment = 'INSERT INTO action_users (action_user, action, object, more) VALUES (?,?,?,?)';
+	//Извлекает id пользователя который оставил комментарий
+	public $select_user_from_comment_id = 'SELECT users.id, comments.parent_id_user FROM users, comments WHERE comments.id=? AND users.id=comments.parent_id_user';
+	//Удаляет уведомление лайка комментария
+	public $action_del_like_comment = "DELETE FROM action_users WHERE action_user=? AND action='like_comment' AND more=?";
+	//Добавляет уведомление комментария
+	public $action_add_like_comment = 'INSERT INTO action_users (action_user, action, object, more) VALUES (?,?,?,?)';
+	//Добавляет уведомление лайка публикации
+	public $action_add_like_publication = 'INSERT INTO action_users (action_user, action, object, more) VALUES (?,?,?,?)';
+	//Удаляет уведомление лайка публикации
+	public $action_del_like_publication = "DELETE FROM action_users WHERE action_user=? AND action='like_publication' AND more=?";
+	//Извлекает всех пользователей по логину или имени по совпадению
+	public $search_users = "SELECT * FROM users WHERE login LIKE  ? OR name LIKE ?";
+	//Извлекает все хештеги по совпадению
+	public $search_hashtags = "SELECT * FROM hashtags WHERE hashtag LIKE ?";
+	//Извлекает публикации по хештегу
+	public $select_publication_in_hashtag = "SELECT parent_id_publication FROM hashtags WHERE hashtag LIKE ?";
+	//Уменьшает количество публикаций пользователя
+	public $decrement_count_publications = 'UPDATE users SET count_publications = count_publications - 1 WHERE id=?';
+	//Удаляет запись публикации
+	public $delete_publication = 'DELETE FROM publications WHERE public_id=?';
+	//Извлекает пользователя по логину
+	public $select_login = "SELECT * FROM users WHERE login=?";
+	//Добавление нового подписчика
+	public $action_add_subscribe = 'INSERT INTO action_users (action_user, action, object) VALUES(?,?,?)';
+	//Удаление подписки
+	public $action_del_subscribe = "DELETE FROM action_users WHERE action_user=? AND action='subscribe_user' AND object=?";
+	//Извлекаем данные по логину или паролю
+	public $check_user_login_mail = 'SELECT users.*, mails.* FROM users, mails WHERE (users.login=? AND mails.parent_id=users.id) OR (mails.mail=? AND users.id=mails.parent_id)';
+	//Обновляет пароль
+	public $add_kode_restore_pass = 'UPDATE users SET code_restore_pass = ? WHERE login=?';
+	//Извлекает данные пользователя по коду восстановления пароля
+	public $select_user_in_code_restore = 'SELECT * FROM users WHERE code_restore_pass=?';
+	//Обновляет пароль, по коду восстановления
+	public $update_password = 'UPDATE users SET password=?, code_restore_pass=null WHERE code_restore_pass=?';
 }

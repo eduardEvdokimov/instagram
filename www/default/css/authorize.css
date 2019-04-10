@@ -1,0 +1,295 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+
+body{
+	background: #F6F5F5;
+}
+
+
+#main{
+
+	width: 100%;
+	float: left;
+	margin-top: 5%;
+}
+
+#phone_block{
+	position: relative;
+
+	width: 500px;
+	margin-left: 20%;
+	float: left;
+
+}
+
+
+#phone_block > img{
+	height: 550px;
+}
+
+#phone_block > ul{
+	
+}
+
+#phone_block > ul > li{
+	position: absolute;
+	top: 55px;
+	left: 190px;
+	z-index: 100;
+}
+#phone_block > ul > li> img{
+	width: 243px;
+	height: 432px;
+}
+
+
+#block_authorize{
+	width: 25%;
+	height: 500px;
+	border: 1px solid #C0BFBF;
+	float: left;
+	background: white;
+	margin-top: 2%;
+}
+
+#block_authorize > h1{
+text-align: center;
+	
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+
+
+
+#form_register{
+	width: 100%;
+	margin: 10px 0 0 15%;
+}
+
+#form_register > .field{
+	padding: 5px;
+	width: 70%;
+	margin-bottom: 20px;
+	outline: none;
+	transition-property: padding, box-shadow,  font-size;
+	transition-duration: 0.2s;
+	border: 1px solid #E8E7E7;
+	border-radius: 3px;
+}
+
+#block_authorize > .field{
+	padding: 5px;
+	width: 70%;
+	margin-bottom: 20px;
+	outline: none;
+	transition-property: padding, box-shadow,  font-size;
+	transition-duration: 0.2s;
+	border: 1px solid #E8E7E7;
+	border-radius: 3px;
+	margin-left: 15%;
+}
+#block_authorize > .field:focus{
+	padding: 10px;
+	font-size: 15px;
+	transition-property: padding, box-shadow, font-size;
+	transition-duration: 0.2s;
+	box-shadow: 0px 8px 36px -1px rgba(163,163,163,1);
+	border: 1px solid #E8E7E7;
+}
+
+#block_authorize > #send{
+	margin-left: 15%;
+}
+#block_authorize > p{
+	margin-left: 15%;
+}
+
+#form_register > .field:focus{
+	padding: 10px;
+	font-size: 15px;
+	transition-property: padding, box-shadow, font-size;
+	transition-duration: 0.2s;
+	box-shadow: 0px 8px 36px -1px rgba(163,163,163,1);
+	border: 1px solid #E8E7E7;
+}
+
+
+#send{
+	width: 73%;
+	padding: 5px;
+	background: #1EACFE;
+	cursor: pointer;
+	border: 1px solid #1EACFE;
+	color: white;
+	transition: 0.2s;
+	outline: none;
+	border-radius: 3px;
+}
+
+.hidden{
+	display: none;
+}
+
+#send:hover{
+	background: #018DDE;
+	border: 1px solid #018DDE;
+	transition: 0.2s;
+}
+
+
+
+#login_social{
+	
+	width: 100%;
+	margin-top: 40px;
+	float: left;
+	text-align: center;
+	
+}
+
+#login_social > p{
+	display: inline-block;
+	width: auto;
+	margin-right: 2%;
+	margin-bottom: 20px;
+}
+
+
+#login_system{
+	text-decoration: none;
+	color: #1EACFE;
+}
+
+#btn_restore_pass{
+	background: none;
+	border: none;
+	color: #1EACFE;
+	outline: none;
+	cursor: pointer;
+}
+
+
+#login_VK{
+	float: left;
+	width: 80px;
+	padding: 8px;
+	text-decoration: none;
+	font-size: 18px;
+	margin-left: 37%;
+	margin-top: 20px;
+	border: 2px solid #4a76a8;
+	color: #4a76a8;
+	transition-property: background, color;
+	transition-duration: 0.2s;
+}
+
+#login_VK:hover{
+	transition-property: background, color;
+	transition-duration: 0.2s;
+	color: white;
+	background: #4a76a8;
+}
+
+#form_restore_password{
+	width: 100%;
+}
+
+#form_restore_password > h2, #block_authorize > h2{
+	font-size: 16px;
+	margin: 20px;
+	text-align: center;
+}
+
+#form_restore_password > #login_mail{
+	padding: 5px;
+	width: 70%;
+	margin-top: 3%;
+	margin-left: 11%;
+	margin-bottom: 3%;
+	outline: none;
+	transition-property: padding, box-shadow,  font-size;
+	transition-duration: 0.2s;
+	border: 1px solid #E8E7E7;
+	border-radius: 3px;
+}
+
+#form_restore_password > #login_mail:focus{
+	padding: 10px;
+	font-size: 15px;
+	transition-property: padding, box-shadow, font-size;
+	transition-duration: 0.2s;
+	box-shadow: 0px 8px 36px -1px rgba(163,163,163,1);
+	border: 1px solid #E8E7E7;
+}
+
+#send_email{
+	width: 73%;
+	padding: 5px;
+	background: #1EACFE;
+	cursor: pointer;
+	border: 1px solid #1EACFE;
+	color: white;
+	transition: 0.2s;
+	outline: none;
+	border-radius: 3px;
+	margin-left: 11%;
+}
+
+#send_email:hover{
+	background: #018DDE;
+	border: 1px solid #018DDE;
+	transition: 0.2s;
+}
+
+#exit_restore_form{
+	background: none;
+	border: none;
+	color: #1EACFE;
+	outline: none;
+	cursor: pointer;
+	margin: 5% 35%;
+}
+
+#error_input, #error_user{
+	margin-left: 11%;
+}
+
+#block_confirm_account{
+	width: 100%;
+}
+
+#block_confirm_account > h2{
+	text-align: center;
+	margin-bottom: 3%;
+}
+
+#block_confirm_account > p{
+	text-align: center;
+	margin-left: 3%;
+	margin-right: 3%;
+}
+
+#action_mail{
+	width: 73%;
+	padding: 5px;
+	background: #1EACFE;
+	cursor: pointer;
+	border: 1px solid #1EACFE;
+	color: white;
+	transition: 0.2s;
+	outline: none;
+	border-radius: 3px;
+	display: block;
+	text-align: center;
+	margin: 5% auto;
+	text-decoration: none;
+}
+
+#action_mail:hover{
+	background: #018DDE;
+	border: 1px solid #018DDE;
+	transition: 0.2s;
+}

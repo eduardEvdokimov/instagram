@@ -5,8 +5,10 @@
 			<ul>
 				{foreach from=$users key=k item=value}
 				<li id='{$value.login}'>
-					<img src='/img/users_avatar/{$value.avatar}'>
-					<p>{$value.login}</p>
+					<a href='http://instagram/user/{$value.login}/'>
+						<img src='/img/users_avatar/{$value.avatar}'>
+						<p>{$value.login}</p>
+					</a>
 					<button class='show subscribe_btn' onclick='subscribe(event)' id='sub'>Подписаться</button>
 				</li>
 				{/foreach}

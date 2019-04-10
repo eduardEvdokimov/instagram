@@ -8,8 +8,8 @@ require_once '../models/UsersModel.php'; //работаем с бд
 
 function indexAction(Smarty $smarty)
 {
-	$smarty->assign('ID', ID_VK);
-	$smarty->assign('URL', URL);
+	$smarty->assign('ID', ID_VK); //ID приложения ВК
+	$smarty->assign('URL', URL);//Адрес обработки запроса авторизации через ВК
 
 	loadTemplate($smarty, 'register');
 }
@@ -36,6 +36,7 @@ function addUserAction()
 
 	//Добавление пользователя в ДБ
 	$data = registerUserAction($connection, $_POST['login'], $_POST['mail'], $_POST['password'], $_POST['name']);
+
 	if($data){
 		$result['message'] = 'Вы успешно зарегистрировались';
 		echo json_encode($result);
@@ -44,7 +45,6 @@ function addUserAction()
 		echo json_encode($result);
 	}
 }
-
 
 //Подтверждение регистрации
 function confirmAction()

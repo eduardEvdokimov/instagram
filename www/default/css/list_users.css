@@ -27,11 +27,9 @@
 	float: left;
 	margin-bottom: 10px;
 	width: 100%;
-
-
 }
 
-#list_users_sub > ul > li > img{
+#list_users_sub > ul > li > a > img{
 	margin: 5px 5px 1px 10px;
 	border-radius: 50%;
 	width: 40px;
@@ -39,18 +37,33 @@
 	float: left;
 }
 
-#list_users_sub > ul > li > p{
+#list_users_sub > ul > li > a > p{
 	float: left;
 	margin-top: 15px;
+	color: black;
 
 }
 
 #list_users_sub > ul > li > .subscribe_btn{
 	float: right;
-	
 	margin-top: 17px;
 	border: none;
 	cursor: pointer;
 	margin-right: 20px;
+	padding: 5px;
+	background: #1EACFE;
+	cursor: pointer;
+	border: 1px solid #1EACFE;
+	color: white;
+	transition: 0.2s;
+	outline: none;
+	border-radius: 3px;
+	
+}
+
+#list_users_sub > ul > li > .subscribe_btn:hover{
+	background: #018DDE;
+	border: 1px solid #018DDE;
+	transition: 0.2s;
 }
 

@@ -1,4 +1,4 @@
-background_form//Добавление комментария публикации
+//Добавление комментария публикации
 function addComment(event)
 {
 	//Проверяем нажал ли пользователь на enter
@@ -33,7 +33,6 @@ function addComment(event)
 			processData: false,
 			contentType: false,
 			success: function(data){
-				console.log(data);
 				var user_login = $('#my_login').html(); //Извлекаем из тега логин пользователя публикации
 				if(data){
 					//Проверяем где запущен скрипт. Если check_main_page = true, значит на главной
@@ -55,7 +54,7 @@ function addComment(event)
 		});
 	}
 }
-
+//Делает анимацию лайка (фейковый лайк)
 function falseLike(event){
 	//Получаем JQuery объект публикации на которыую кликнули
 	var publication = $(event.target).closest('.publication');
@@ -73,7 +72,6 @@ function likeDoubleClick(event)
 {
 	var publication = $(event.target).closest('.publication');
 	var publication_id = publication.attr('id');
-	console.log(publication);
 	var data = new FormData();
 
 	data.append('publication_id', publication_id);
@@ -85,7 +83,6 @@ function likeDoubleClick(event)
 		processData: false,
 		contentType: false,
 		success: function(data){
-			console.log('+');
 			//Меняем картинку на закрашенное сердце
 			publication.find('#button_like > img').attr('src', '/img/cyte/heart_red.png');
 			//Меняем значение onclick на функцию удаления лайка
@@ -114,7 +111,6 @@ function addLike(event)
 {
 	var publication = $(event.target).closest('.publication');
 	var publication_id = publication.attr('id');
-	console.log(publication);
 	var data = new FormData();
 
 	data.append('publication_id', publication_id);
@@ -126,7 +122,6 @@ function addLike(event)
 		processData: false,
 		contentType: false,
 		success: function(data){
-				console.log('+');
 				//Меняем картинку на закрашенное сердце
 				publication.find('#button_like > img').attr('src', '/img/cyte/heart_red.png');
 				//Меняем значение onclick на функцию удаления лайка
@@ -135,7 +130,6 @@ function addLike(event)
 				publication.find('#likes').html(Number(publication.find('#likes').html()) + 1);
 
 				publication.find('.image_publication').attr('ondblclick', 'falseLike(event)');
-			
 		},
 		error: function(){
 			alert('Произошла ошибка. Попробуйте позже.');
@@ -190,7 +184,6 @@ function addLikeComment(event)
 		processData: false,
 		contentType: false,
 		success: function(data){
-			console.log(data);
 			if(data == true){
 				//Меняем картинку на закрашенное сердце
 				$(elemet_li).find('img').attr('src', '/img/cyte/heart_red.png');
@@ -210,6 +203,7 @@ function addLikeComment(event)
 function setFocus(event){
 	$(event.target).closest('.publication').find('#addComment').focus();
 }
+
 //Удаляет лайк комментария
 function delLikeComment(event)
 {
@@ -226,7 +220,6 @@ function delLikeComment(event)
 		processData: false,
 		contentType: false,
 		success: function(data){
-			console.log(data);
 			if(data == true){
 				//Меняем картинку на не закрашенное сердце
 				$(elemet_li).find('img').attr('src', '/img/cyte/heart.png');
@@ -260,7 +253,6 @@ function loadComments(event){
 		contentType: false,
 		dataType: 'json',
 		success: function(data){
-			console.log(data);
 			//Проверяем сколько пришло комментариев от сервера
 			if(data.length < 10){
 				//Если меньше 10, прячем кнопку подгрузки комментариев
@@ -282,19 +274,14 @@ function loadComments(event){
 	});
 }
 
-
-
+//Отслеживает скрол мыши, для подгрузки остальных публикаций
 $(document).ready(function(){
-	
 	var inProgress = false; //Отслеживает запущен ли запрос к серверу
-
 	var count_pub = 12; //Начальное количество показанных новостей
 	
 	$(window).scroll(function(){
+		//Проверяем, что скрол дошел до конца страницы и не запущен запрос к серверу
 		if(($(window).scrollTop() + $(window).height() >= $(document).height() - 50) && !inProgress){
-
-			
-			
 			$.ajax({
 				type: 'post',
 				url: 'http://instagram/index/loadPublications/',
@@ -304,11 +291,9 @@ $(document).ready(function(){
 					inProgress = true;
 				},
 				success: function(data){
-					console.log(data);
-					
+					if(data instanceof Array)
 					if(data.length > 0){
 						$.each(data, function(index, data){
-
 							var content = "<div class='publication' id='" + data.public_id + "'><div class='header_block'>";
 							content += "<a href='http://instagram/user/" + data.login + "/'>";
 							content += "<img src='/img/users_avatar/" + data.avatar + "' alt=''>";
@@ -321,9 +306,7 @@ $(document).ready(function(){
 							content += "<p class='count_likes'><span id='likes'>" + data.likes + "</span><span> отметок 'Нравится'</span></p>";
 							data.visible_comment = (data.visible_comment == undefined) ? '' : data.visible_comment;
 							data.title = (data.title == undefined) ? '' : data.title;
-							content += "<p class='article_publication'>" + data.title + "</p>" + data.visible_comment;
-
-							
+							content += "<p class='article_publication'>" + data.title + "</p>" + data.visible_comment;	
 							content += "</div><div class='list_comments'><ul>";
 
 							if(data.comment.length > 0)
@@ -332,7 +315,6 @@ $(document).ready(function(){
 								content += "<a href='http://instagram/user/" + data.comment[i].login + "/'>";
 								content += "<span class='login'>" + data.comment[i].login + "</span></a>";
 								content += "<span class='article'>&nbsp;" + data.comment[i].comment + "</span></p>" + data.comment[i].button_like + "</li>";
-
 							}
 				
 	
